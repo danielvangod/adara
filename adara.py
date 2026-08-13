@@ -35,6 +35,27 @@ PALETA_COLORES = {
     "Sanciones": "#FF9F40",       # Naranja
     "Asunto Personal": "#9966FF", # Morado
     "Otro": "#C9CBCF"             # Gris
+}
+# Ocultar solo el menú de la esquina superior derecha, GitHub y el footer,
+# manteniendo activo el botón del menú lateral (Sidebar).
+ocultar_elementos_css = """
+    <style>
+    /* Ocultar menú de opciones de la esquina superior derecha */
+    #MainMenu {visibility: show;}
+    
+    /* Ocultar pie de página de Streamlit */
+    footer {visibility: hidden;}
+    
+    /* Ocultar barra de herramientas donde aparecen los botones de GitHub/Edit */
+    div[data-testid="stToolbar"] {display: none !important;}
+    
+    /* Ocultar íconos adicionales de la barra superior sin ocultar la barra completa */
+    div[data-testid="stAppHeader"] > div:nth-child(2) {display: none !important;}
+    </style>
+"""
+st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
+st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
+
 
 # Inicializar estados globales
 if "menu_opcion" not in st.session_state:
