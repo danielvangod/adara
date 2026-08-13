@@ -41,7 +41,7 @@ PALETA_COLORES = {
 ocultar_elementos_css = """
     <style>
     /* Ocultar menú de opciones de la esquina superior derecha */
-    #MainMenu {visibility: hidden;}
+    #MainMenu {visibility: show;}
     
     /* Ocultar pie de página de Streamlit */
     footer {visibility: hidden;}
