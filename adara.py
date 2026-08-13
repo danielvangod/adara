@@ -36,6 +36,20 @@ PALETA_COLORES = {
     "Asunto Personal": "#9966FF", # Morado
     "Otro": "#C9CBCF"             # Gris
 }
+# Ocultar completamente la barra superior, menú de Streamlit, ícono de GitHub y footer
+ocultar_elementos_css = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    [data-testid="stHeader"] {display: none;}
+    [data-testid="stToolbar"] {display: none;}
+    [data-testid="stDecoration"] {display: none;}
+    [data-testid="stStatusWidget"] {display: none;}
+    </style>
+"""
+st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
+
 
 # Inicializar estados globales
 if "menu_opcion" not in st.session_state:
