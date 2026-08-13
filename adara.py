@@ -36,26 +36,31 @@ PALETA_COLORES = {
     "Asunto Personal": "#9966FF", # Morado
     "Otro": "#C9CBCF"             # Gris
 }
-# Ocultar solo el menú de la esquina superior derecha, GitHub y el footer,
-# manteniendo activo el botón del menú lateral (Sidebar).
+# Mantiene visible el botón para abrir el menú lateral en móviles,
+# pero oculta completamente los botones de GitHub, Edición y Menú de desarrollo.
 ocultar_elementos_css = """
     <style>
-    /* Ocultar menú de opciones de la esquina superior derecha */
-    #MainMenu {visibility: show;}
-    
-    /* Ocultar pie de página de Streamlit */
+    /* Ocultar menú de opciones de Streamlit y footer */
+    #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
-    /* Ocultar barra de herramientas donde aparecen los botones de GitHub/Edit */
+    /* Ocultar botones de GitHub, Edición y herramientas de desarrollador */
     div[data-testid="stToolbar"] {display: none !important;}
     
-    /* Ocultar íconos adicionales de la barra superior sin ocultar la barra completa */
-    div[data-testid="stAppHeader"] > div:nth-child(2) {display: none !important;}
+    /* Asegurar que el botón del menú lateral (sidebar) sea visible y accesible en móviles */
+    [data-testid="stSidebarCollapseButton"] {
+        display: block !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+    }
+    
+    /* Mantener visible el encabezado únicamente para el botón del menú */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
     </style>
 """
 st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
-st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
-
 
 # Inicializar estados globales
 if "menu_opcion" not in st.session_state:
