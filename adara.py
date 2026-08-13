@@ -41,8 +41,8 @@ PALETA_COLORES = {
 ocultar_elementos_css = """
     <style>
     /* Ocultar menú de opciones de Streamlit y footer */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
+    #MainMenu {visibility: show;}
+    footer {visibility: show;}
     
     /* Ocultar botones de GitHub, Edición y herramientas de desarrollador */
     div[data-testid="stToolbar"] {display: none !important;}
