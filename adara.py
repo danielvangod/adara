@@ -35,11 +35,6 @@ PALETA_COLORES = {
     "Sanciones": "#FF9F40",       # Naranja
     "Asunto Personal": "#9966FF", # Morado
     "Otro": "#C9CBCF"             # Gris
-}
-
-st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
-st.markdown(ocultar_elementos_css, unsafe_allow_html=True)
-
 
 # Inicializar estados globales
 if "menu_opcion" not in st.session_state:
