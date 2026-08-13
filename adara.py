@@ -1,0 +1,473 @@
+import streamlit as st
+import pandas as pd
+from datetime import date, datetime
+from streamlit_gsheets import GSheetsConnection
+from streamlit_calendar import calendar
+
+# ===================================================================
+# 1. CONFIGURACIÓN Y CONSTANTES
+# ===================================================================
+st.set_page_config(
+    page_title="Control de Permisos de Ausencia", 
+    page_icon="📅", 
+    layout="wide"
+)
+
+PALETA_COLORES = {
+    "Médica": "#36A2EB",         # Azul
+    "Vacaciones": "#4BC0C0",      # Verde turquesa
+    "Suspensiones": "#FF6384",    # Rojo / Rosa
+    "Sanciones": "#FF9F40",       # Naranja
+    "Asunto Personal": "#9966FF", # Morado
+    "Otro": "#C9CBCF"             # Gris
+}
+
+# Inicializar estados globales
+if "menu_opcion" not in st.session_state:
+    st.session_state["menu_opcion"] = "🏠 Inicio (Permisos de Hoy)"
+
+if "evento_a_modificar" not in st.session_state:
+    st.session_state["evento_a_modificar"] = None
+
+if "cal_key" not in st.session_state:
+    st.session_state["cal_key"] = 0
+
+if "evento_seleccionado" not in st.session_state:
+    st.session_state["evento_seleccionado"] = None
+
+if "mensaje_accion" not in st.session_state:
+    st.session_state["mensaje_accion"] = None
+
+# Conexión a Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+# ===================================================================
+# 2. FUNCIONES DE AYUDA Y BASE DE DATOS
+# ===================================================================
+def fmt_fecha(fecha_val, con_hora=False):
+    """Convierte una fecha, string o timestamp a formato legible dd/mm/yyyy."""
+    if pd.isna(fecha_val) or not fecha_val or str(fecha_val).strip() == "":
+        return "-"
+    try:
+        dt = pd.to_datetime(fecha_val)
+        if con_hora:
+            return dt.strftime("%d/%m/%Y %H:%M")
+        return dt.strftime("%d/%m/%Y")
+    except Exception:
+        return str(fecha_val)
+
+def cargar_datos():
+    try:
+        df = conn.read(ttl=0)
+        
+        # Columnas obligatorias
+        cols_esperadas = [
+            "Empleado", "Tipo", "Fecha_Inicio", "Fecha_Fin", 
+            "Observaciones", "Alerta", "Fecha_Creacion", "Fecha_Modificacion"
+        ]
+        
+        # Si faltan columnas nuevas (por registros antiguos), las creamos
+        for col in cols_esperadas:
+            if col not in df.columns:
+                df[col] = ""
+
+        if not df.empty:
+            df["Fecha_Inicio"] = pd.to_datetime(df["Fecha_Inicio"]).dt.date
+            df["Fecha_Fin"] = pd.to_datetime(df["Fecha_Fin"]).dt.date
+            
+        return df[cols_esperadas]
+    except Exception as e:
+        st.error(f"Error al conectar con Google Sheets: {e}")
+        return pd.DataFrame(columns=[
+            "Empleado", "Tipo", "Fecha_Inicio", "Fecha_Fin", 
+            "Observaciones", "Alerta", "Fecha_Creacion", "Fecha_Modificacion"
+        ])
+
+def guardar_o_actualizar_registro(nuevo_dict, df_actual, idx_editar=None):
+    ahora_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if idx_editar is not None and str(idx_editar).isdigit():
+        idx_int = int(idx_editar)
+        if idx_int in df_actual.index:
+            # Mantener la fecha de creación original si existe
+            f_creac_orig = df_actual.loc[idx_int, "Fecha_Creacion"]
+            if pd.isna(f_creac_orig) or not str(f_creac_orig).strip():
+                f_creac_orig = ahora_str
+                
+            nuevo_dict["Fecha_Creacion"] = str(f_creac_orig)
+            nuevo_dict["Fecha_Modificacion"] = ahora_str
+            
+            df_actual.loc[idx_int] = nuevo_dict
+            df_actualizado = df_actual
+        else:
+            nuevo_dict["Fecha_Creacion"] = ahora_str
+            nuevo_dict["Fecha_Modificacion"] = ahora_str
+            df_nuevo = pd.DataFrame([nuevo_dict])
+            df_actualizado = pd.concat([df_actual, df_nuevo], ignore_index=True)
+    else:
+        nuevo_dict["Fecha_Creacion"] = ahora_str
+        nuevo_dict["Fecha_Modificacion"] = ahora_str
+        df_nuevo = pd.DataFrame([nuevo_dict])
+        df_actualizado = pd.concat([df_actual, df_nuevo], ignore_index=True)
+
+    conn.update(data=df_actualizado)
+
+def eliminar_registro(df_actual, idx_eliminar):
+    if idx_eliminar is not None and str(idx_eliminar).isdigit():
+        idx_int = int(idx_eliminar)
+        if idx_int in df_actual.index:
+            df_actualizado = df_actual.drop(index=idx_int).reset_index(drop=True)
+            conn.update(data=df_actualizado)
+            return True
+    return False
+
+def mostrar_mensaje_alerta():
+    if st.session_state.get("mensaje_accion"):
+        tipo, texto = st.session_state["mensaje_accion"]
+        if tipo == "success":
+            st.success(texto)
+        elif tipo == "info":
+            st.info(texto)
+        elif tipo == "warning":
+            st.warning(texto)
+        st.session_state["mensaje_accion"] = None
+
+def callback_iniciar_edicion(props):
+    st.session_state["evento_a_modificar"] = {
+        "id": props.get("id"),
+        "Empleado": props.get("empleado"),
+        "Tipo": props.get("tipo"),
+        "Fecha_Inicio": props.get("fecha_inicio"),
+        "Fecha_Fin": props.get("fecha_fin"),
+        "Observaciones": props.get("observaciones"),
+        "Alerta": props.get("alerta"),
+        "Fecha_Creacion": props.get("fecha_creacion"),
+        "Fecha_Modificacion": props.get("fecha_modificacion")
+    }
+    st.session_state["evento_seleccionado"] = None
+    st.session_state["cal_key"] += 1
+    st.session_state["menu_opcion"] = "➕ Registrar Permiso"
+    st.session_state["mensaje_accion"] = ("info", f"✏️ **Acción realizada:** Se cargaron los datos de **{props.get('empleado')}** en el formulario de edición.")
+
+def sincronizar_fecha_fin(key_ini, key_fin):
+    """Iguala automáticamente la fecha de fin a la fecha de inicio cuando esta cambia."""
+    if key_ini in st.session_state:
+        st.session_state[key_fin] = st.session_state[key_ini]
+
+# ===================================================================
+# 3. VISTAS DE LA APLICACIÓN
+# ===================================================================
+def vista_inicio(df_permisos):
+    mostrar_mensaje_alerta()
+    st.title("📋 Control de Ausencias - Inicio")
+    st.markdown(f"**Fecha actual:** {date.today().strftime('%d/%m/%Y')}")
+    st.markdown("---")
+    
+    st.subheader("👥 Empleados ausentes o con permiso el día de hoy")
+    hoy = date.today()
+    
+    if not df_permisos.empty:
+        activos_hoy = df_permisos[
+            (df_permisos["Fecha_Inicio"] <= hoy) & (df_permisos["Fecha_Fin"] >= hoy)
+        ]
+        
+        if not activos_hoy.empty:
+            for idx, row in activos_hoy.iterrows():
+                tipo_permiso = row['Tipo']
+                f_ini_fmt = fmt_fecha(row['Fecha_Inicio'])
+                f_fin_fmt = fmt_fecha(row['Fecha_Fin'])
+                
+                with st.expander(f"🔴 **{row['Empleado']}** — *{tipo_permiso}*"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"**Periodo:** Desde {f_ini_fmt} hasta {f_fin_fmt}")
+                        st.write(f"**Observaciones:** {row['Observaciones']}")
+                    with col2:
+                        alerta_txt = str(row['Alerta'])
+                        if alerta_txt.strip() and alerta_txt.lower() != "nan" and alerta_txt != "Ninguna":
+                            st.warning(f"⚠️ **Alerta / Recordatorio:** {alerta_txt}")
+                        else:
+                            st.info("Sin alertas activas para este permiso.")
+                            
+                    st.caption(f"🗓️ *Creado:* {fmt_fecha(row.get('Fecha_Creacion'), con_hora=True)} | *Última Modificación:* {fmt_fecha(row.get('Fecha_Modificacion'), con_hora=True)}")
+        else:
+            st.success("🎉 No hay ausencias ni permisos registrados para el día de hoy.")
+    else:
+        st.info("No hay datos registrados en la base de datos de Google Sheets.")
+
+def vista_registrar_permiso(df_permisos):
+    mostrar_mensaje_alerta()
+    st.title("📝 Registrar / Modificar Permiso")
+    
+    datos_mod = st.session_state.get("evento_a_modificar")
+
+    if datos_mod:
+        st.info(f"✏️ **Modo Edición activo (Fila {datos_mod.get('id')}):** Modificando datos de **{datos_mod['Empleado']}**.")
+        col_canc, col_del, _ = st.columns([0.18, 0.22, 0.60])
+        with col_canc:
+            if st.button("❌ Cancelar edición", use_container_width=True):
+                emp_nom = datos_mod.get('Empleado', '')
+                st.session_state["evento_a_modificar"] = None
+                st.session_state["mensaje_accion"] = ("info", f"ℹ️ Se canceló la edición del registro de **{emp_nom}**.")
+                st.rerun()
+        with col_del:
+            if st.button("🗑️ Eliminar permiso", type="primary", use_container_width=True):
+                emp_nom = datos_mod.get('Empleado', '')
+                if eliminar_registro(df_permisos, datos_mod.get("id")):
+                    st.session_state["evento_a_modificar"] = None
+                    st.session_state["mensaje_accion"] = ("success", f"✅ **Acción realizada:** Se ha eliminado exitosamente el permiso de **{emp_nom}**.")
+                    st.rerun()
+
+    # Prellenado de variables
+    idx_editar = datos_mod.get("id") if datos_mod else "nuevo"
+    def_empleado = datos_mod.get("Empleado", "") if datos_mod else ""
+    def_tipo = str(datos_mod.get("Tipo", "Vacaciones")).strip() if datos_mod else "Vacaciones"
+    def_inicio = pd.to_datetime(datos_mod.get("Fecha_Inicio")).date() if datos_mod else date.today()
+    def_fin = pd.to_datetime(datos_mod.get("Fecha_Fin")).date() if datos_mod else date.today()
+    def_obs = datos_mod.get("Observaciones", "") if datos_mod else ""
+    def_alerta = datos_mod.get("Alerta", "") if datos_mod else ""
+
+    list_tipos = list(PALETA_COLORES.keys())
+    
+    idx_tipo = 0
+    for i, t in enumerate(list_tipos):
+        if t.lower() == def_tipo.lower():
+            idx_tipo = i
+            break
+
+    key_ini = f"f_ini_{idx_editar}"
+    key_fin = f"f_fin_{idx_editar}"
+
+    # Inicialización de fechas en session_state si no existen
+    if key_ini not in st.session_state:
+        st.session_state[key_ini] = def_inicio
+    if key_fin not in st.session_state:
+        st.session_state[key_fin] = def_fin
+
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        empleado = st.text_input("Nombre completo del empleado *", value=def_empleado)
+        tipo = st.selectbox("Tipo de Permiso / Ausencia *", list_tipos, index=idx_tipo)
+        
+    with col2:
+        fecha_inicio = st.date_input(
+            "Fecha de inicio *", 
+            format="DD/MM/YYYY",
+            key=key_ini,
+            on_change=sincronizar_fecha_fin,
+            args=(key_ini, key_fin)
+        )
+        
+        fecha_fin = st.date_input(
+            "Fecha de fin *", 
+            min_value=fecha_inicio,
+            format="DD/MM/YYYY",
+            key=key_fin
+        )
+
+    with st.form(key=f"form_permisos_{idx_editar}", clear_on_submit=False):
+        observaciones = st.text_area("Observaciones o motivo:", value=def_obs)
+        alerta = st.text_input(
+            "Alerta de recordatorio (Opcional):", 
+            value=def_alerta,
+            placeholder="Ej: Solicitar constancia médica / Llamar a las 10:00 AM"
+        )
+        
+        texto_boton = "💾 Actualizar Permiso Existente" if datos_mod else "💾 Guardar Nuevo Permiso"
+        btn_guardar = st.form_submit_button(texto_boton)
+        
+        if btn_guardar:
+            if not empleado.strip():
+                st.error("⚠️ Por favor, ingresa el nombre del empleado.")
+            else:
+                registro_dict = {
+                    "Empleado": empleado.strip(),
+                    "Tipo": tipo,
+                    "Fecha_Inicio": str(fecha_inicio),
+                    "Fecha_Fin": str(fecha_fin),
+                    "Observaciones": observaciones.strip(),
+                    "Alerta": alerta.strip() if alerta.strip() else "Ninguna"
+                }
+                
+                idx_real = datos_mod.get("id") if datos_mod else None
+                guardar_o_actualizar_registro(registro_dict, df_permisos, idx_editar=idx_real)
+                
+                accion_str = "actualizó" if datos_mod else "creó y guardó"
+                st.session_state["mensaje_accion"] = ("success", f"✅ **Acción realizada:** Se {accion_str} correctamente el permiso de **{empleado.strip()}** ({tipo}).")
+                st.session_state["evento_a_modificar"] = None
+                
+                # Limpiar claves del formulario
+                if key_ini in st.session_state:
+                    del st.session_state[key_ini]
+                if key_fin in st.session_state:
+                    del st.session_state[key_fin]
+                
+                st.rerun()
+
+def vista_calendario(df_permisos):
+    mostrar_mensaje_alerta()
+    st.title("🗓️ Mapa y Calendario de Ausencias")
+    st.write("Haz clic sobre un evento para ver los detalles, editar o eliminar el registro.")
+    
+    st.markdown("**Leyenda por categoría de ausencia:**")
+    cols = st.columns(len(PALETA_COLORES))
+    for i, (cat, color) in enumerate(PALETA_COLORES.items()):
+        cols[i].markdown(f"<span style='color:{color}; font-size:22px;'>■</span> **{cat}**", unsafe_allow_html=True)
+    
+    st.markdown("---")
+
+    if st.session_state.get("evento_seleccionado"):
+        props = st.session_state["evento_seleccionado"]
+        
+        f_ini_fmt = fmt_fecha(props.get('fecha_inicio'))
+        f_fin_fmt = fmt_fecha(props.get('fecha_fin'))
+
+        st.info("🔎 **Detalle del permiso seleccionado:**")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.write(f"**Empleado:** {props.get('empleado')}")
+            st.write(f"**Categoría:** {props.get('tipo')}")
+            st.write(f"**Periodo:** {f_ini_fmt} al {f_fin_fmt}")
+        with col_b:
+            st.write(f"**Observaciones:** {props.get('observaciones')}")
+            alerta_evt = str(props.get('alerta'))
+            if alerta_evt and alerta_evt != "Ninguna" and alerta_evt.lower() != "nan":
+                st.warning(f"⚠️ **Alerta:** {alerta_evt}")
+            else:
+                st.info("Sin alertas para este registro.")
+
+        st.caption(f"🕒 **Creado:** {fmt_fecha(props.get('fecha_creacion'), con_hora=True)} | **Modificado:** {fmt_fecha(props.get('fecha_modificacion'), con_hora=True)}")
+
+        st.caption("**Acciones disponibles:**")
+        col_mod, col_elim, col_cerrar, _ = st.columns([0.15, 0.15, 0.12, 0.58])
+
+        with col_mod:
+            st.button(
+                "✏️ Modificar", 
+                key="btn_mod_si", 
+                use_container_width=True, 
+                on_click=callback_iniciar_edicion, 
+                args=(props,)
+            )
+
+        with col_elim:
+            if st.button("🗑️ Eliminar", key="btn_elim_si", type="primary", use_container_width=True):
+                emp_nom = props.get("empleado")
+                if eliminar_registro(df_permisos, props.get("id")):
+                    st.session_state["evento_seleccionado"] = None
+                    st.session_state["cal_key"] += 1
+                    st.session_state["mensaje_accion"] = ("success", f"🗑️ **Acción realizada:** Se eliminó correctamente el permiso de **{emp_nom}**.")
+                    st.rerun()
+
+        with col_cerrar:
+            if st.button("❌ Cerrar", key="btn_mod_no", use_container_width=True):
+                st.session_state["evento_seleccionado"] = None
+                st.session_state["cal_key"] += 1
+                st.session_state["mensaje_accion"] = ("info", "ℹ️ **Acción realizada:** Se cerró el panel de vista previa del evento.")
+                st.rerun()
+
+        st.markdown("---")
+
+    if not df_permisos.empty:
+        eventos = []
+        for idx, row in df_permisos.iterrows():
+            f_inicio = str(row['Fecha_Inicio'])
+            f_fin_cal = str(pd.to_datetime(row['Fecha_Fin']) + pd.Timedelta(days=1))[:10]
+
+            eventos.append({
+                "id": str(idx),
+                "title": f"{row['Empleado']} ({row['Tipo']})",
+                "start": f_inicio,
+                "end": f_fin_cal,
+                "color": PALETA_COLORES.get(row['Tipo'], "#3788d8"),
+                "extendedProps": {
+                    "id": str(idx),
+                    "empleado": str(row['Empleado']),
+                    "tipo": str(row['Tipo']),
+                    "fecha_inicio": f_inicio,
+                    "fecha_fin": str(row['Fecha_Fin']),
+                    "observaciones": str(row.get('Observaciones', '')),
+                    "alerta": str(row.get('Alerta', 'Ninguna')),
+                    "fecha_creacion": str(row.get('Fecha_Creacion', '')),
+                    "fecha_modificacion": str(row.get('Fecha_Modificacion', ''))
+                }
+            })
+            
+        opciones_cal = {
+            "locale": "es",
+            "headerToolbar": {
+                "left": "prev,next today",
+                "center": "title",
+                "right": "dayGridMonth,timeGridWeek,listMonth"
+            },
+            "buttonText": {
+                "today": "Hoy",
+                "month": "Mes",
+                "week": "Semana",
+                "list": "Agenda"
+            },
+            "initialView": "dayGridMonth",
+            "selectable": True,
+        }
+        
+        key_actual = f"cal_permisos_{st.session_state['cal_key']}"
+        cal_resultado = calendar(events=eventos, options=opciones_cal, key=key_actual)
+        
+        if cal_resultado and "eventClick" in cal_resultado:
+            evento_info = cal_resultado["eventClick"]["event"]
+            props = evento_info.get("extendedProps", {})
+            if st.session_state.get("evento_seleccionado") != props:
+                st.session_state["evento_seleccionado"] = props
+                st.rerun()
+    else:
+        st.info("No hay permisos registrados para mostrar en el calendario.")
+
+def vista_historial(df_permisos):
+    mostrar_mensaje_alerta()
+    st.title("📂 Historial Completo de Permisos")
+    st.write("Tabla de datos sincronizada con Google Sheets.")
+    
+    if not df_permisos.empty:
+        df_mostrar = df_permisos.copy()
+        df_mostrar["Fecha_Inicio"] = df_mostrar["Fecha_Inicio"].apply(fmt_fecha)
+        df_mostrar["Fecha_Fin"] = df_mostrar["Fecha_Fin"].apply(fmt_fecha)
+        df_mostrar["Fecha_Creacion"] = df_mostrar["Fecha_Creacion"].apply(lambda x: fmt_fecha(x, con_hora=True))
+        df_mostrar["Fecha_Modificacion"] = df_mostrar["Fecha_Modificacion"].apply(lambda x: fmt_fecha(x, con_hora=True))
+        
+        st.dataframe(df_mostrar, use_container_width=True)
+    else:
+        st.info("No hay registros almacenados actualmente.")
+
+# ===================================================================
+# 4. CONTROLADOR PRINCIPAL
+# ===================================================================
+def main():
+    st.sidebar.title("📌 Menú de Navegación")
+    
+    opciones_menu = [
+        "🏠 Inicio (Permisos de Hoy)", 
+        "➕ Registrar Permiso", 
+        "📅 Calendario Visual", 
+        "📂 Historial Completo"
+    ]
+
+    opcion = st.sidebar.radio(
+        "Selecciona una sección:",
+        opciones_menu,
+        key="menu_opcion"
+    )
+    
+    df_permisos = cargar_datos()
+
+    if opcion == "🏠 Inicio (Permisos de Hoy)":
+        vista_inicio(df_permisos)
+    elif opcion == "➕ Registrar Permiso":
+        vista_registrar_permiso(df_permisos)
+    elif opcion == "📅 Calendario Visual":
+        vista_calendario(df_permisos)
+    elif opcion == "📂 Historial Completo":
+        vista_historial(df_permisos)
+
+if __name__ == "__main__":
+    main()
