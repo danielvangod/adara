@@ -1,8 +1,23 @@
 import streamlit as st
 import pandas as pd
-from datetime import date, datetime
+from datetime import datetime
+import pytz
 from streamlit_gsheets import GSheetsConnection
 from streamlit_calendar import calendar
+
+# ===================================================================
+# CONFIGURACIÓN DE ZONA HORARIA Y FECHAS
+# ===================================================================
+# Definir la zona horaria local (cambia si estás en otra zona, ej: 'America/Mexico_City', 'America/Bogota')
+ZONA_HORARIA = pytz.timezone('America/Guatemala')
+
+def obtener_fecha_actual():
+    """Devuelve la fecha actual ajustada a la zona horaria local."""
+    return datetime.now(ZONA_HORARIA).date()
+
+def obtener_timestamp_actual():
+    """Devuelve fecha y hora completa en formato string ajustada a la zona horaria local."""
+    return datetime.now(ZONA_HORARIA).strftime("%Y-%m-%d %H:%M:%S")
 
 # ===================================================================
 # 1. CONFIGURACIÓN Y CONSTANTES
@@ -60,13 +75,11 @@ def cargar_datos():
     try:
         df = conn.read(ttl=0)
         
-        # Columnas obligatorias
         cols_esperadas = [
             "Empleado", "Tipo", "Fecha_Inicio", "Fecha_Fin", 
             "Observaciones", "Alerta", "Fecha_Creacion", "Fecha_Modificacion"
         ]
         
-        # Si faltan columnas nuevas (por registros antiguos), las creamos
         for col in cols_esperadas:
             if col not in df.columns:
                 df[col] = ""
@@ -84,12 +97,11 @@ def cargar_datos():
         ])
 
 def guardar_o_actualizar_registro(nuevo_dict, df_actual, idx_editar=None):
-    ahora_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ahora_str = obtener_timestamp_actual()
 
     if idx_editar is not None and str(idx_editar).isdigit():
         idx_int = int(idx_editar)
         if idx_int in df_actual.index:
-            # Mantener la fecha de creación original si existe
             f_creac_orig = df_actual.loc[idx_int, "Fecha_Creacion"]
             if pd.isna(f_creac_orig) or not str(f_creac_orig).strip():
                 f_creac_orig = ahora_str
@@ -150,7 +162,6 @@ def callback_iniciar_edicion(props):
     st.session_state["mensaje_accion"] = ("info", f"✏️ **Acción realizada:** Se cargaron los datos de **{props.get('empleado')}** en el formulario de edición.")
 
 def sincronizar_fecha_fin(key_ini, key_fin):
-    """Iguala automáticamente la fecha de fin a la fecha de inicio cuando esta cambia."""
     if key_ini in st.session_state:
         st.session_state[key_fin] = st.session_state[key_ini]
 
@@ -160,11 +171,11 @@ def sincronizar_fecha_fin(key_ini, key_fin):
 def vista_inicio(df_permisos):
     mostrar_mensaje_alerta()
     st.title("📋 Control de Ausencias - Inicio")
-    st.markdown(f"**Fecha actual:** {date.today().strftime('%d/%m/%Y')}")
+    hoy = obtener_fecha_actual()
+    st.markdown(f"**Fecha actual:** {hoy.strftime('%d/%m/%Y')}")
     st.markdown("---")
     
     st.subheader("👥 Empleados ausentes o con permiso el día de hoy")
-    hoy = date.today()
     
     if not df_permisos.empty:
         activos_hoy = df_permisos[
@@ -200,6 +211,7 @@ def vista_registrar_permiso(df_permisos):
     st.title("📝 Registrar / Modificar Permiso")
     
     datos_mod = st.session_state.get("evento_a_modificar")
+    hoy = obtener_fecha_actual()
 
     if datos_mod:
         st.info(f"✏️ **Modo Edición activo (Fila {datos_mod.get('id')}):** Modificando datos de **{datos_mod['Empleado']}**.")
@@ -218,12 +230,11 @@ def vista_registrar_permiso(df_permisos):
                     st.session_state["mensaje_accion"] = ("success", f"✅ **Acción realizada:** Se ha eliminado exitosamente el permiso de **{emp_nom}**.")
                     st.rerun()
 
-    # Prellenado de variables
     idx_editar = datos_mod.get("id") if datos_mod else "nuevo"
     def_empleado = datos_mod.get("Empleado", "") if datos_mod else ""
     def_tipo = str(datos_mod.get("Tipo", "Vacaciones")).strip() if datos_mod else "Vacaciones"
-    def_inicio = pd.to_datetime(datos_mod.get("Fecha_Inicio")).date() if datos_mod else date.today()
-    def_fin = pd.to_datetime(datos_mod.get("Fecha_Fin")).date() if datos_mod else date.today()
+    def_inicio = pd.to_datetime(datos_mod.get("Fecha_Inicio")).date() if datos_mod else hoy
+    def_fin = pd.to_datetime(datos_mod.get("Fecha_Fin")).date() if datos_mod else hoy
     def_obs = datos_mod.get("Observaciones", "") if datos_mod else ""
     def_alerta = datos_mod.get("Alerta", "") if datos_mod else ""
 
@@ -238,7 +249,6 @@ def vista_registrar_permiso(df_permisos):
     key_ini = f"f_ini_{idx_editar}"
     key_fin = f"f_fin_{idx_editar}"
 
-    # Inicialización de fechas en session_state si no existen
     if key_ini not in st.session_state:
         st.session_state[key_ini] = def_inicio
     if key_fin not in st.session_state:
@@ -297,7 +307,6 @@ def vista_registrar_permiso(df_permisos):
                 st.session_state["mensaje_accion"] = ("success", f"✅ **Acción realizada:** Se {accion_str} correctamente el permiso de **{empleado.strip()}** ({tipo}).")
                 st.session_state["evento_a_modificar"] = None
                 
-                # Limpiar claves del formulario
                 if key_ini in st.session_state:
                     del st.session_state[key_ini]
                 if key_fin in st.session_state:
