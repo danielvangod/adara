@@ -435,7 +435,7 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON CUSTOM_CSS CORREGIDO)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
@@ -549,10 +549,13 @@ def vista_calendario(df_permisos):
         
         key_actual = f"cal_permisos_{st.session_state['cal_key']}"
         
+        # Inyección de seguridad del CSS
+        st.markdown(f"<style>{CSS_CALENDARIO_PERSONALIZADO}</style>", unsafe_allow_html=True)
+        
         cal_resultado = calendar(
             events=eventos, 
             options=opciones_cal,
-            customCss=CSS_CALENDARIO_PERSONALIZADO,
+            custom_css=CSS_CALENDARIO_PERSONALIZADO,  # <-- CORREGIDO: Usando custom_css
             key=key_actual
         )
         
