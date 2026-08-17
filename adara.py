@@ -332,11 +332,11 @@ def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
     
     # -------------------------------------------------------------------
-    # ESTILOS CSS PERSONALIZADOS (Inspirados en la imagen)
+    # ESTILOS CSS PERSONALIZADOS CON TUS COLORES SOLICITADOS
     # -------------------------------------------------------------------
     st.markdown("""
         <style>
-        /* Título del mes en minúsculas y morado oscuro */
+        /* Título del mes en minúsculas con ícono de calendario */
         .fc-toolbar-title {
             color: #2D006B !important;
             font-weight: 800 !important;
@@ -344,35 +344,52 @@ def vista_calendario(df_permisos):
             text-transform: lowercase !important;
         }
         
-        /* Botones principales de navegación (Prev, Next, Mes, Semana, Agenda) */
+        /* Icono de calendario junto al texto del mes */
+        .fc-toolbar-title::before {
+            content: "📅 ";
+            margin-right: 6px;
+        }
+        
+        /* Botones principales (Mes, Semana, Agenda, Flechas < >) en #764adf */
         .fc-button-primary {
-            background-color: #6C5CE7 !important;
-            border-color: #6C5CE7 !important;
+            background-color: #764adf !important;
+            border-color: #764adf !important;
             border-radius: 12px !important;
             color: white !important;
             font-weight: bold !important;
             padding: 8px 16px !important;
-            box-shadow: 0px 2px 6px rgba(108, 92, 231, 0.3) !important;
+            box-shadow: 0px 2px 6px rgba(118, 74, 223, 0.3) !important;
         }
         
         .fc-button-primary:hover {
-            background-color: #5A4BFC !important;
-            border-color: #5A4BFC !important;
+            background-color: #5d35b8 !important;
+            border-color: #5d35b8 !important;
         }
         
-        /* Botón de "Hoy" */
+        /* Botón "Hoy" en #764adf */
         .fc-today-button {
-            background-color: #F0EDFF !important;
-            border: 1px solid #D6CEFF !important;
-            color: #6C5CE7 !important;
+            background-color: #764adf !important;
+            border-color: #764adf !important;
+            color: white !important;
             border-radius: 12px !important;
+            opacity: 0.9;
+        }
+        
+        .fc-today-button:hover {
+            opacity: 1 !important;
+            background-color: #5d35b8 !important;
+        }
+        
+        /* Fondo del área de la cuadrícula en #f5f2fd */
+        .fc-daygrid-body, .fc-scrollgrid-sync-table {
+            background-color: #f5f2fd !important;
         }
         
         /* Encabezado con los días de la semana */
         .fc-col-header-cell {
-            background-color: #F8F7FF !important;
+            background-color: #f5f2fd !important;
             padding: 10px 0 !important;
-            border: none !important;
+            border-color: #e2d9f8 !important;
         }
         
         .fc-col-header-cell-cushion {
@@ -382,15 +399,20 @@ def vista_calendario(df_permisos):
             font-size: 0.85rem !important;
         }
         
-        /* Celdas de los días */
-        .fc-daygrid-day {
-            border: 1px solid #F0F0F8 !important;
+        /* Celdas y líneas divisorias de los días en morado suave */
+        .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th {
+            border: 1px solid #e2d9f8 !important;
         }
         
         .fc-daygrid-day-number {
             color: #2D006B !important;
             font-weight: bold !important;
             padding: 8px !important;
+        }
+
+        /* Resaltado del día de hoy */
+        .fc-day-today {
+            background-color: #eae3fb !important;
         }
 
         /* Bloques de Eventos en el Calendario */
@@ -496,8 +518,8 @@ def vista_calendario(df_permisos):
                 "title": f"{icono} {row['Empleado']} ({row['Tipo']})",
                 "start": f_inicio,
                 "end": f_fin_cal,
-                "backgroundColor": PALETA_COLORES.get(row['Tipo'], "#6C5CE7"),
-                "borderColor": PALETA_COLORES.get(row['Tipo'], "#6C5CE7"),
+                "backgroundColor": PALETA_COLORES.get(row['Tipo'], "#764adf"),
+                "borderColor": PALETA_COLORES.get(row['Tipo'], "#764adf"),
                 "textColor": "#FFFFFF",
                 "extendedProps": {
                     "id": str(idx),
