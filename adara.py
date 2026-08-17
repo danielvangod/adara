@@ -466,7 +466,7 @@ def vista_calendario(df_permisos):
                 gap: 8px;
             ">
                 <span style="background-color: {color}; color: white; padding: 6px 10px; border-radius: 8px; font-size: 16px;">{icono}</span>
-                <span style="font-size: 17px; font-weight: 800; color: #2D006B;">{cat}</span>
+                <span style="font-size: 15px; font-weight: 800; color: #2D006B;">{cat}</span>
             </div>
             """, 
             unsafe_allow_html=True
