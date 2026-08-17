@@ -6,20 +6,7 @@ from streamlit_gsheets import GSheetsConnection
 from streamlit_calendar import calendar
 
 # ===================================================================
-# CONFIGURACIÓN DE ZONA HORARIA Y FECHAS (Guatemala UTC-6)
-# ===================================================================
-ZONA_HORARIA = pytz.timezone('America/Guatemala')
-
-def obtener_fecha_actual():
-    """Devuelve la fecha actual ajustada a la zona horaria local."""
-    return datetime.now(ZONA_HORARIA).date()
-
-def obtener_timestamp_actual():
-    """Devuelve fecha y hora completa en formato string ajustada a la zona horaria local."""
-    return datetime.now(ZONA_HORARIA).strftime("%Y-%m-%d %H:%M:%S")
-
-# ===================================================================
-# 1. CONFIGURACIÓN Y CONSTANTES
+# [SEGMENTO 1]: CONFIGURACIÓN DE PÁGINA Y ZONA HORARIA
 # ===================================================================
 st.set_page_config(
     page_title="Control de Permisos de Ausencia", 
@@ -28,20 +15,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# -------------------------------------------------------------------
-# OCULTAR ÚNICAMENTE EL BOTÓN DE GITHUB
-# -------------------------------------------------------------------
-ocultar_github_css = """
-    <style>
-    /* Ocultar el icono/enlace de GitHub en la barra superior */
-    [data-testid="stHeader"] a[href*="github.com"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    </style>
-"""
-st.markdown(ocultar_github_css, unsafe_allow_html=True)
+ZONA_HORARIA = pytz.timezone('America/Guatemala')
 
+def obtener_fecha_actual():
+    """Devuelve la fecha actual ajustada a la zona horaria local."""
+    return datetime.now(ZONA_HORARIA).date()
+
+def obtener_timestamp_actual():
+    """Devuelve fecha y hora completa ajustada a la zona horaria local."""
+    return datetime.now(ZONA_HORARIA).strftime("%Y-%m-%d %H:%M:%S")
+
+
+# ===================================================================
+# [SEGMENTO 2]: CONFIGURACIÓN DE COLORES Y PALETA VISUAL
+# ===================================================================
+# Edita aquí los colores Hexadecimales para los eventos del calendario
 PALETA_COLORES = {
     "Médica": "#36A2EB",         # Azul
     "Vacaciones": "#4BC0C0",      # Verde turquesa
@@ -51,7 +39,124 @@ PALETA_COLORES = {
     "Otro": "#8E44AD"             # Violeta Oscuro
 }
 
-# Inicializar estados globales
+# Edita aquí los íconos asociados a cada categoría
+ICONOS_CATEGORIAS = {
+    "Médica": "➕", 
+    "Vacaciones": "🧳", 
+    "Suspensiones": "📋", 
+    "Sanciones": "⚖️", 
+    "Asunto Personal": "👤", 
+    "Otro": "💬"
+}
+
+
+# ===================================================================
+# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (DENTRO DEL IFRAME)
+# ===================================================================
+# Modifica aquí la apariencia visual del calendario sin alterar la lógica
+CSS_CALENDARIO_PERSONALIZADO = """
+    /* Título del mes en minúsculas con ícono de calendario */
+    .fc-toolbar-title {
+        color: #2D006B !important;
+        font-weight: 800 !important;
+        font-size: 1.8rem !important;
+        text-transform: lowercase !important;
+    }
+    .fc-toolbar-title::before {
+        content: "📅 ";
+        margin-right: 6px;
+    }
+    
+    /* Botones principales (Mes, Semana, Agenda, Flechas < >) */
+    .fc-button-primary {
+        background-color: #764adf !important;
+        border-color: #764adf !important;
+        border-radius: 12px !important;
+        color: white !important;
+        font-weight: bold !important;
+        padding: 8px 16px !important;
+        box-shadow: 0px 2px 6px rgba(118, 74, 223, 0.3) !important;
+    }
+    .fc-button-primary:hover {
+        background-color: #5d35b8 !important;
+        border-color: #5d35b8 !important;
+    }
+    
+    /* Botón "Hoy" */
+    .fc-today-button {
+        background-color: #764adf !important;
+        border-color: #764adf !important;
+        color: white !important;
+        border-radius: 12px !important;
+        opacity: 0.9;
+    }
+    .fc-today-button:hover {
+        opacity: 1 !important;
+        background-color: #5d35b8 !important;
+    }
+    
+    /* Fondo de la cuadrícula en #f5f2fd */
+    .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
+        background-color: #f5f2fd !important;
+    }
+    
+    /* Encabezado con los días de la semana */
+    .fc-col-header-cell {
+        background-color: #f5f2fd !important;
+        padding: 10px 0 !important;
+        border-color: #e2d9f8 !important;
+    }
+    .fc-col-header-cell-cushion {
+        color: #2D006B !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+        font-size: 0.85rem !important;
+    }
+    
+    /* Celdas y líneas divisorias de los días */
+    .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th, .fc-scrollgrid {
+        border: 1px solid #e2d9f8 !important;
+    }
+    .fc-daygrid-day-number {
+        color: #2D006B !important;
+        font-weight: bold !important;
+        padding: 8px !important;
+    }
+
+    /* Resaltado del día de hoy */
+    .fc-day-today {
+        background-color: #eae3fb !important;
+    }
+
+    /* Bloques de Eventos */
+    .fc-event {
+        border-radius: 10px !important;
+        border: none !important;
+        padding: 4px 8px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.08) !important;
+    }
+"""
+
+
+# ===================================================================
+# [SEGMENTO 4]: ESTILOS CSS GLOBALES (OCULTAR ELEMENTOS DE STREAMLIT)
+# ===================================================================
+st.markdown("""
+    <style>
+    /* Ocultar el icono/enlace de GitHub en la barra superior */
+    [data-testid="stHeader"] a[href*="github.com"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+# ===================================================================
+# [SEGMENTO 5]: INICIALIZACIÓN DEL ESTADO DE SESIÓN Y CONEXIÓN
+# ===================================================================
 if "menu_opcion" not in st.session_state:
     st.session_state["menu_opcion"] = "🏠 Inicio (Permisos de Hoy)"
 
@@ -67,14 +172,15 @@ if "evento_seleccionado" not in st.session_state:
 if "mensaje_accion" not in st.session_state:
     st.session_state["mensaje_accion"] = None
 
-# Conexión a Google Sheets
+# Conexión a la hoja de cálculo
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+
 # ===================================================================
-# 2. FUNCIONES DE AYUDA Y BASE DE DATOS
+# [SEGMENTO 6]: FUNCIONES DE BASE DE DATOS Y UTILIDADES
 # ===================================================================
 def fmt_fecha(fecha_val, con_hora=False):
-    """Convierte una fecha, string o timestamp a formato legible dd/mm/yyyy."""
+    """Convierte una fecha o timestamp a formato legible dd/mm/yyyy."""
     if pd.isna(fecha_val) or not fecha_val or str(fecha_val).strip() == "":
         return "-"
     try:
@@ -88,12 +194,10 @@ def fmt_fecha(fecha_val, con_hora=False):
 def cargar_datos():
     try:
         df = conn.read(ttl=0)
-        
         cols_esperadas = [
             "Empleado", "Tipo", "Fecha_Inicio", "Fecha_Fin", 
             "Observaciones", "Alerta", "Fecha_Creacion", "Fecha_Modificacion"
         ]
-        
         for col in cols_esperadas:
             if col not in df.columns:
                 df[col] = ""
@@ -122,7 +226,6 @@ def guardar_o_actualizar_registro(nuevo_dict, df_actual, idx_editar=None):
                 
             nuevo_dict["Fecha_Creacion"] = str(f_creac_orig)
             nuevo_dict["Fecha_Modificacion"] = ahora_str
-            
             df_actual.loc[idx_int] = nuevo_dict
             df_actualizado = df_actual
         else:
@@ -179,8 +282,9 @@ def sincronizar_fecha_fin(key_ini, key_fin):
     if key_ini in st.session_state:
         st.session_state[key_fin] = st.session_state[key_ini]
 
+
 # ===================================================================
-# 3. VISTAS DE LA APLICACIÓN
+# [SEGMENTO 7]: VISTA 1 - INICIO (PERMISOS DE HOY)
 # ===================================================================
 def vista_inicio(df_permisos):
     mostrar_mensaje_alerta()
@@ -220,6 +324,10 @@ def vista_inicio(df_permisos):
     else:
         st.info("No hay datos registrados en la base de datos de Google Sheets.")
 
+
+# ===================================================================
+# [SEGMENTO 8]: VISTA 2 - REGISTRAR / EDITAR PERMISO
+# ===================================================================
 def vista_registrar_permiso(df_permisos):
     mostrar_mensaje_alerta()
     st.title("📝 Registrar / Modificar Permiso")
@@ -328,120 +436,17 @@ def vista_registrar_permiso(df_permisos):
                 
                 st.rerun()
 
+
+# ===================================================================
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL
+# ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
-    
-    # -------------------------------------------------------------------
-    # ESTILOS CSS PERSONALIZADOS CON TUS COLORES SOLICITADOS
-    # -------------------------------------------------------------------
-    st.markdown("""
-        <style>
-        /* Título del mes en minúsculas con ícono de calendario */
-        .fc-toolbar-title {
-            color: #2D006B !important;
-            font-weight: 800 !important;
-            font-size: 1.8rem !important;
-            text-transform: lowercase !important;
-        }
-        
-        /* Icono de calendario junto al texto del mes */
-        .fc-toolbar-title::before {
-            content: "📅 ";
-            margin-right: 6px;
-        }
-        
-        /* Botones principales (Mes, Semana, Agenda, Flechas < >) en #764adf */
-        .fc-button-primary {
-            background-color: #764adf !important;
-            border-color: #764adf !important;
-            border-radius: 12px !important;
-            color: white !important;
-            font-weight: bold !important;
-            padding: 8px 16px !important;
-            box-shadow: 0px 2px 6px rgba(118, 74, 223, 0.3) !important;
-        }
-        
-        .fc-button-primary:hover {
-            background-color: #5d35b8 !important;
-            border-color: #5d35b8 !important;
-        }
-        
-        /* Botón "Hoy" en #764adf */
-        .fc-today-button {
-            background-color: #764adf !important;
-            border-color: #764adf !important;
-            color: white !important;
-            border-radius: 12px !important;
-            opacity: 0.9;
-        }
-        
-        .fc-today-button:hover {
-            opacity: 1 !important;
-            background-color: #5d35b8 !important;
-        }
-        
-        /* Fondo del área de la cuadrícula en #f5f2fd */
-        .fc-daygrid-body, .fc-scrollgrid-sync-table {
-            background-color: #f5f2fd !important;
-        }
-        
-        /* Encabezado con los días de la semana */
-        .fc-col-header-cell {
-            background-color: #f5f2fd !important;
-            padding: 10px 0 !important;
-            border-color: #e2d9f8 !important;
-        }
-        
-        .fc-col-header-cell-cushion {
-            color: #2D006B !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            font-size: 0.85rem !important;
-        }
-        
-        /* Celdas y líneas divisorias de los días en morado suave */
-        .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th {
-            border: 1px solid #e2d9f8 !important;
-        }
-        
-        .fc-daygrid-day-number {
-            color: #2D006B !important;
-            font-weight: bold !important;
-            padding: 8px !important;
-        }
 
-        /* Resaltado del día de hoy */
-        .fc-day-today {
-            background-color: #eae3fb !important;
-        }
-
-        /* Bloques de Eventos en el Calendario */
-        .fc-event {
-            border-radius: 10px !important;
-            border: none !important;
-            padding: 4px 8px !important;
-            font-size: 0.82rem !important;
-            font-weight: 600 !important;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.08) !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # -------------------------------------------------------------------
-    # LEYENDA SUPERIOR EN TARJETAS ESTILIZADAS
-    # -------------------------------------------------------------------
+    # Leyenda superior generada dinámicamente desde el Segmento 2
     cols = st.columns(6)
-    iconos_cat = {
-        "Médica": "➕", 
-        "Vacaciones": "🧳", 
-        "Suspensiones": "📋", 
-        "Sanciones": "⚖️", 
-        "Asunto Personal": "👤", 
-        "Otro": "💬"
-    }
-    
     for i, (cat, color) in enumerate(PALETA_COLORES.items()):
-        icono = iconos_cat.get(cat, "📌")
+        icono = ICONOS_CATEGORIAS.get(cat, "📌")
         cols[i].markdown(
             f"""
             <div style="
@@ -465,7 +470,7 @@ def vista_calendario(df_permisos):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Panel de detalle del evento seleccionado
+    # Detalle del evento seleccionado
     if st.session_state.get("evento_seleccionado"):
         props = st.session_state["evento_seleccionado"]
         f_ini_fmt = fmt_fecha(props.get('fecha_inicio'))
@@ -502,16 +507,13 @@ def vista_calendario(df_permisos):
 
         st.markdown("---")
 
-    # -------------------------------------------------------------------
-    # RENDERIZADO DEL COMPONENTE CALENDARIO
-    # -------------------------------------------------------------------
+    # Renderizado del calendario
     if not df_permisos.empty:
         eventos = []
         for idx, row in df_permisos.iterrows():
             f_inicio = str(row['Fecha_Inicio'])
             f_fin_cal = str(pd.to_datetime(row['Fecha_Fin']) + pd.Timedelta(days=1))[:10]
-            
-            icono = iconos_cat.get(row['Tipo'], '📌')
+            icono = ICONOS_CATEGORIAS.get(row['Tipo'], '📌')
 
             eventos.append({
                 "id": str(idx),
@@ -552,7 +554,14 @@ def vista_calendario(df_permisos):
         }
         
         key_actual = f"cal_permisos_{st.session_state['cal_key']}"
-        cal_resultado = calendar(events=eventos, options=opciones_cal, key=key_actual)
+        
+        # Inyección del CSS definido en el Segmento 3
+        cal_resultado = calendar(
+            events=eventos, 
+            options=opciones_cal, 
+            customCss=CSS_CALENDARIO_PERSONALIZADO, 
+            key=key_actual
+        )
         
         if cal_resultado and "eventClick" in cal_resultado:
             evento_info = cal_resultado["eventClick"]["event"]
@@ -563,6 +572,10 @@ def vista_calendario(df_permisos):
     else:
         st.info("No hay permisos registrados para mostrar en el calendario.")
 
+
+# ===================================================================
+# [SEGMENTO 10]: VISTA 4 - HISTORIAL COMPLETO
+# ===================================================================
 def vista_historial(df_permisos):
     mostrar_mensaje_alerta()
     st.title("📂 Historial Completo de Permisos")
@@ -579,8 +592,9 @@ def vista_historial(df_permisos):
     else:
         st.info("No hay registros almacenados actualmente.")
 
+
 # ===================================================================
-# 4. CONTROLADOR PRINCIPAL
+# [SEGMENTO 11]: CONTROLADOR PRINCIPAL Y MENÚ DE NAVEGACIÓN
 # ===================================================================
 def main():
     st.sidebar.title("📌 Menú de Navegación")
