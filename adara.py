@@ -6,9 +6,8 @@ from streamlit_gsheets import GSheetsConnection
 from streamlit_calendar import calendar
 
 # ===================================================================
-# CONFIGURACIÓN DE ZONA HORARIA Y FECHAS
+# CONFIGURACIÓN DE ZONA HORARIA Y FECHAS (Guatemala UTC-6)
 # ===================================================================
-# Definir la zona horaria local (cambia si estás en otra zona, ej: 'America/Mexico_City', 'America/Bogota')
 ZONA_HORARIA = pytz.timezone('America/Guatemala')
 
 def obtener_fecha_actual():
@@ -25,16 +24,31 @@ def obtener_timestamp_actual():
 st.set_page_config(
     page_title="Control de Permisos de Ausencia", 
     page_icon="📅", 
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+# -------------------------------------------------------------------
+# OCULTAR ÚNICAMENTE EL BOTÓN DE GITHUB
+# -------------------------------------------------------------------
+ocultar_github_css = """
+    <style>
+    /* Ocultar el icono/enlace de GitHub en la barra superior */
+    [data-testid="stHeader"] a[href*="github.com"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    </style>
+"""
+st.markdown(ocultar_github_css, unsafe_allow_html=True)
 
 PALETA_COLORES = {
     "Médica": "#36A2EB",         # Azul
     "Vacaciones": "#4BC0C0",      # Verde turquesa
-    "Suspensiones": "#FF6384",    # Rojo / Rosa
+    "Suspensiones": "#FF6384",    # Rosa / Rojo
     "Sanciones": "#FF9F40",       # Naranja
     "Asunto Personal": "#9966FF", # Morado
-    "Otro": "#C9CBCF"             # Gris
+    "Otro": "#8E44AD"             # Violeta Oscuro
 }
 
 # Inicializar estados globales
@@ -316,19 +330,122 @@ def vista_registrar_permiso(df_permisos):
 
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
-    st.title("🗓️ Mapa y Calendario de Ausencias")
-    st.write("Haz clic sobre un evento para ver los detalles, editar o eliminar el registro.")
     
-    st.markdown("**Leyenda por categoría de ausencia:**")
-    cols = st.columns(len(PALETA_COLORES))
-    for i, (cat, color) in enumerate(PALETA_COLORES.items()):
-        cols[i].markdown(f"<span style='color:{color}; font-size:22px;'>■</span> **{cat}**", unsafe_allow_html=True)
-    
-    st.markdown("---")
+    # -------------------------------------------------------------------
+    # ESTILOS CSS PERSONALIZADOS (Inspirados en la imagen)
+    # -------------------------------------------------------------------
+    st.markdown("""
+        <style>
+        /* Título del mes en minúsculas y morado oscuro */
+        .fc-toolbar-title {
+            color: #2D006B !important;
+            font-weight: 800 !important;
+            font-size: 1.8rem !important;
+            text-transform: lowercase !important;
+        }
+        
+        /* Botones principales de navegación (Prev, Next, Mes, Semana, Agenda) */
+        .fc-button-primary {
+            background-color: #6C5CE7 !important;
+            border-color: #6C5CE7 !important;
+            border-radius: 12px !important;
+            color: white !important;
+            font-weight: bold !important;
+            padding: 8px 16px !important;
+            box-shadow: 0px 2px 6px rgba(108, 92, 231, 0.3) !important;
+        }
+        
+        .fc-button-primary:hover {
+            background-color: #5A4BFC !important;
+            border-color: #5A4BFC !important;
+        }
+        
+        /* Botón de "Hoy" */
+        .fc-today-button {
+            background-color: #F0EDFF !important;
+            border: 1px solid #D6CEFF !important;
+            color: #6C5CE7 !important;
+            border-radius: 12px !important;
+        }
+        
+        /* Encabezado con los días de la semana */
+        .fc-col-header-cell {
+            background-color: #F8F7FF !important;
+            padding: 10px 0 !important;
+            border: none !important;
+        }
+        
+        .fc-col-header-cell-cushion {
+            color: #2D006B !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            font-size: 0.85rem !important;
+        }
+        
+        /* Celdas de los días */
+        .fc-daygrid-day {
+            border: 1px solid #F0F0F8 !important;
+        }
+        
+        .fc-daygrid-day-number {
+            color: #2D006B !important;
+            font-weight: bold !important;
+            padding: 8px !important;
+        }
 
+        /* Bloques de Eventos en el Calendario */
+        .fc-event {
+            border-radius: 10px !important;
+            border: none !important;
+            padding: 4px 8px !important;
+            font-size: 0.82rem !important;
+            font-weight: 600 !important;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.08) !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # -------------------------------------------------------------------
+    # LEYENDA SUPERIOR EN TARJETAS ESTILIZADAS
+    # -------------------------------------------------------------------
+    cols = st.columns(6)
+    iconos_cat = {
+        "Médica": "➕", 
+        "Vacaciones": "🧳", 
+        "Suspensiones": "📋", 
+        "Sanciones": "⚖️", 
+        "Asunto Personal": "👤", 
+        "Otro": "💬"
+    }
+    
+    for i, (cat, color) in enumerate(PALETA_COLORES.items()):
+        icono = iconos_cat.get(cat, "📌")
+        cols[i].markdown(
+            f"""
+            <div style="
+                background-color: white; 
+                padding: 8px 12px; 
+                border-radius: 12px; 
+                border: 1px solid #EAEAEA; 
+                text-align: center; 
+                box-shadow: 0px 2px 5px rgba(0,0,0,0.03);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            ">
+                <span style="background-color: {color}; color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">{icono}</span>
+                <span style="font-size: 13px; font-weight: bold; color: #333;">{cat}</span>
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Panel de detalle del evento seleccionado
     if st.session_state.get("evento_seleccionado"):
         props = st.session_state["evento_seleccionado"]
-        
         f_ini_fmt = fmt_fecha(props.get('fecha_inicio'))
         f_fin_fmt = fmt_fecha(props.get('fecha_fin'))
 
@@ -343,23 +460,10 @@ def vista_calendario(df_permisos):
             alerta_evt = str(props.get('alerta'))
             if alerta_evt and alerta_evt != "Ninguna" and alerta_evt.lower() != "nan":
                 st.warning(f"⚠️ **Alerta:** {alerta_evt}")
-            else:
-                st.info("Sin alertas para este registro.")
 
-        st.caption(f"🕒 **Creado:** {fmt_fecha(props.get('fecha_creacion'), con_hora=True)} | **Modificado:** {fmt_fecha(props.get('fecha_modificacion'), con_hora=True)}")
-
-        st.caption("**Acciones disponibles:**")
         col_mod, col_elim, col_cerrar, _ = st.columns([0.15, 0.15, 0.12, 0.58])
-
         with col_mod:
-            st.button(
-                "✏️ Modificar", 
-                key="btn_mod_si", 
-                use_container_width=True, 
-                on_click=callback_iniciar_edicion, 
-                args=(props,)
-            )
-
+            st.button("✏️ Modificar", key="btn_mod_si", use_container_width=True, on_click=callback_iniciar_edicion, args=(props,))
         with col_elim:
             if st.button("🗑️ Eliminar", key="btn_elim_si", type="primary", use_container_width=True):
                 emp_nom = props.get("empleado")
@@ -368,28 +472,33 @@ def vista_calendario(df_permisos):
                     st.session_state["cal_key"] += 1
                     st.session_state["mensaje_accion"] = ("success", f"🗑️ **Acción realizada:** Se eliminó correctamente el permiso de **{emp_nom}**.")
                     st.rerun()
-
         with col_cerrar:
             if st.button("❌ Cerrar", key="btn_mod_no", use_container_width=True):
                 st.session_state["evento_seleccionado"] = None
                 st.session_state["cal_key"] += 1
-                st.session_state["mensaje_accion"] = ("info", "ℹ️ **Acción realizada:** Se cerró el panel de vista previa del evento.")
                 st.rerun()
 
         st.markdown("---")
 
+    # -------------------------------------------------------------------
+    # RENDERIZADO DEL COMPONENTE CALENDARIO
+    # -------------------------------------------------------------------
     if not df_permisos.empty:
         eventos = []
         for idx, row in df_permisos.iterrows():
             f_inicio = str(row['Fecha_Inicio'])
             f_fin_cal = str(pd.to_datetime(row['Fecha_Fin']) + pd.Timedelta(days=1))[:10]
+            
+            icono = iconos_cat.get(row['Tipo'], '📌')
 
             eventos.append({
                 "id": str(idx),
-                "title": f"{row['Empleado']} ({row['Tipo']})",
+                "title": f"{icono} {row['Empleado']} ({row['Tipo']})",
                 "start": f_inicio,
                 "end": f_fin_cal,
-                "color": PALETA_COLORES.get(row['Tipo'], "#3788d8"),
+                "backgroundColor": PALETA_COLORES.get(row['Tipo'], "#6C5CE7"),
+                "borderColor": PALETA_COLORES.get(row['Tipo'], "#6C5CE7"),
+                "textColor": "#FFFFFF",
                 "extendedProps": {
                     "id": str(idx),
                     "empleado": str(row['Empleado']),
@@ -411,7 +520,7 @@ def vista_calendario(df_permisos):
                 "right": "dayGridMonth,timeGridWeek,listMonth"
             },
             "buttonText": {
-                "today": "Hoy",
+                "today": "🗓️ Hoy",
                 "month": "Mes",
                 "week": "Semana",
                 "list": "Agenda"
