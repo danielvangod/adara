@@ -1,3 +1,4 @@
+import io
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -435,16 +436,14 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON TÍTULO Y LETRAS GRANDES)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON ETIQUETAS AMPLIADAS)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
-    # --- TÍTULO PRINCIPAL DE LA VISTA ---
-    st.title("📅 Calendario de Permisos al Personal")
+    st.title("📅 Calendario de Ausencias")
     st.markdown("---")
 
-    # --- TÍTULO Y LEYENDA DE CATEGORÍAS ---
     st.subheader("🏷️ Categorías de Permisos")
 
     cols = st.columns(6)
@@ -473,7 +472,6 @@ def vista_calendario(df_permisos):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Detalle del evento seleccionado
     if st.session_state.get("evento_seleccionado"):
         props = st.session_state["evento_seleccionado"]
         f_ini_fmt = fmt_fecha(props.get('fecha_inicio'))
@@ -510,7 +508,6 @@ def vista_calendario(df_permisos):
 
         st.markdown("---")
 
-    # Renderizado del calendario
     if not df_permisos.empty:
         eventos = []
         for idx, row in df_permisos.iterrows():
@@ -576,22 +573,66 @@ def vista_calendario(df_permisos):
     else:
         st.info("No hay permisos registrados para mostrar en el calendario.")
 
+
 # ===================================================================
-# [SEGMENTO 10]: VISTA 4 - HISTORIAL COMPLETO
+# [SEGMENTO 10]: VISTA 4 - HISTORIAL COMPLETO (FILTROS Y EXCEL)
 # ===================================================================
 def vista_historial(df_permisos):
     mostrar_mensaje_alerta()
     st.title("📂 Historial Completo de Permisos")
-    st.write("Tabla de datos sincronizada con Google Sheets.")
+    st.write("Consulta, filtra y descarga el registro histórico de ausencias.")
     
     if not df_permisos.empty:
-        df_mostrar = df_permisos.copy()
-        df_mostrar["Fecha_Inicio"] = df_mostrar["Fecha_Inicio"].apply(fmt_fecha)
-        df_mostrar["Fecha_Fin"] = df_mostrar["Fecha_Fin"].apply(fmt_fecha)
-        df_mostrar["Fecha_Creacion"] = df_mostrar["Fecha_Creacion"].apply(lambda x: fmt_fecha(x, con_hora=True))
-        df_mostrar["Fecha_Modificacion"] = df_mostrar["Fecha_Modificacion"].apply(lambda x: fmt_fecha(x, con_hora=True))
-        
-        st.dataframe(df_mostrar, use_container_width=True)
+        df_filtrado = df_permisos.copy()
+        df_filtrado["_dt_inicio"] = pd.to_datetime(df_filtrado["Fecha_Inicio"], errors="coerce")
+
+        st.subheader("🔍 Filtros de Búsqueda")
+        col_filtro_mes, col_filtro_tipo = st.columns(2)
+
+        with col_filtro_mes:
+            df_filtrado["_mes_año"] = df_filtrado["_dt_inicio"].dt.strftime("%m/%Y")
+            meses_disponibles = sorted(
+                [m for m in df_filtrado["_mes_año"].unique() if pd.notna(m)],
+                reverse=True
+            )
+            opciones_mes = ["Todos los meses"] + meses_disponibles
+            mes_seleccionado = st.selectbox("Filtrar por Mes (MM/YYYY):", opciones_mes)
+
+        with col_filtro_tipo:
+            tipos_disponibles = list(PALETA_COLORES.keys())
+            opciones_tipo = ["Todos los tipos"] + tipos_disponibles
+            tipo_seleccionado = st.selectbox("Filtrar por Tipo de Permiso:", opciones_tipo)
+
+        if mes_seleccionado != "Todos los meses":
+            df_filtrado = df_filtrado[df_filtrado["_mes_año"] == mes_seleccionado]
+
+        if tipo_seleccionado != "Todos los tipos":
+            df_filtrado = df_filtrado[df_filtrado["Tipo"] == tipo_seleccionado]
+
+        cols_limpias = [col for col in df_permisos.columns if not col.startswith("_")]
+        df_mostrar = df_filtrado[cols_limpias].copy()
+
+        df_vista = df_mostrar.copy()
+        df_vista["Fecha_Inicio"] = df_vista["Fecha_Inicio"].apply(fmt_fecha)
+        df_vista["Fecha_Fin"] = df_vista["Fecha_Fin"].apply(fmt_fecha)
+        df_vista["Fecha_Creacion"] = df_vista["Fecha_Creacion"].apply(lambda x: fmt_fecha(x, con_hora=True))
+        df_vista["Fecha_Modificacion"] = df_vista["Fecha_Modificacion"].apply(lambda x: fmt_fecha(x, con_hora=True))
+
+        st.markdown(f"**Registros encontrados:** `{len(df_vista)}`")
+        st.dataframe(df_vista, use_container_width=True)
+
+        if not df_mostrar.empty:
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+                df_mostrar.to_excel(writer, index=False, sheet_name="Historial_Permisos")
+            
+            st.download_button(
+                label="📥 Descargar reporte en Excel (.xlsx)",
+                data=buffer.getvalue(),
+                file_name=f"historial_permisos_{obtener_fecha_actual().strftime('%Y%m%d')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                type="primary"
+            )
     else:
         st.info("No hay registros almacenados actualmente.")
 
