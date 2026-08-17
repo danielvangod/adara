@@ -53,7 +53,7 @@ ICONOS_CATEGORIAS = {
 # ===================================================================
 # [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (DENTRO DEL IFRAME)
 # ===================================================================
-# Modifica aquí la apariencia visual del calendario sin alterar la lógica
+# Cadena CSS que se inyecta en la clave 'customCss' de las opciones de la librería
 CSS_CALENDARIO_PERSONALIZADO = """
     /* Título del mes en minúsculas con ícono de calendario */
     .fc-toolbar-title {
@@ -95,7 +95,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
         background-color: #5d35b8 !important;
     }
     
-    /* Fondo de la cuadrícula en #f5f2fd */
+    /* Fondo de la cuadrícula */
     .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
         background-color: #f5f2fd !important;
     }
@@ -536,6 +536,7 @@ def vista_calendario(df_permisos):
                 }
             })
             
+        # Pasar 'customCss' DENTRO de opciones_cal para evitar el TypeError
         opciones_cal = {
             "locale": "es",
             "headerToolbar": {
@@ -551,15 +552,14 @@ def vista_calendario(df_permisos):
             },
             "initialView": "dayGridMonth",
             "selectable": True,
+            "customCss": CSS_CALENDARIO_PERSONALIZADO
         }
         
         key_actual = f"cal_permisos_{st.session_state['cal_key']}"
         
-        # Inyección del CSS definido en el Segmento 3
         cal_resultado = calendar(
             events=eventos, 
             options=opciones_cal, 
-            customCss=CSS_CALENDARIO_PERSONALIZADO, 
             key=key_actual
         )
         
