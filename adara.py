@@ -49,59 +49,42 @@ ICONOS_CATEGORIAS = {
     "Otro": "💬"
 }
 
-
 # ===================================================================
 # [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (DENTRO DEL IFRAME)
 # ===================================================================
 CSS_CALENDARIO_PERSONALIZADO = """
     /* -----------------------------------------------------------
-       CAMBIO MANUAL DE COLORES DE BOTONES
-       (Modifica los códigos Hexadecimales aquí)
+       CAMBIO MANUAL DE COLORES DE BOTONES (EDITA AQUÍ)
     ----------------------------------------------------------- */
     
-    /* 1. Definición global de variables de botones para FullCalendar */
-    :root {
-        --fc-button-bg-color: #9966FF !important;          /* Color de fondo normal */
-        --fc-button-border-color: #8E44A !important;      /* Color del borde normal */
-        --fc-button-hover-bg-color: #5d35b8 !important;    /* Color al pasar el cursor (hover) */
-        --fc-button-hover-border-color: #5d35b8 !important;/* Borde al pasar el cursor */
-        --fc-button-active-bg-color: #48239e !important;   /* Color al hacer clic / vista activa */
-        --fc-button-active-border-color: #48239e !important;
+    /* 1. BOTONES INACTIVOS (Semana, Agenda, Flechas) */
+    .fc .fc-button-primary:not(.fc-button-active) {
+        background-color: #ff4b4b !important;  /* Cambia este Hexadecimal */
+        border-color: #ff4b4b !important;      /* Borde igual al fondo */
+        color: #ffffff !important;             /* Color de texto */
     }
 
-    /* 2. Forzar estilos en todos los botones (Mes, Semana, Agenda, Hoy, Flechas) */
-    .fc .fc-button,
-    .fc .fc-button-primary,
-    .fc .fc-today-button {
-        background-color: var(--fc-button-bg-color) !important;
-        border-color: var(--fc-button-border-color) !important;
-        color: #ffffff !important;
-        border-radius: 10px !important;
-        font-weight: bold !important;
+    /* 2. BOTÓN ACTIVO / SELECCIONADO (Ejemplo: "Mes") */
+    .fc .fc-button-primary.fc-button-active,
+    .fc .fc-button-primary:active {
+        background-color: #1f2937 !important;  /* Cambia este Hexadecimal */
+        border-color: #1f2937 !important;      /* Borde igual al fondo */
+        color: #ffffff !important;             /* Color de texto */
         box-shadow: none !important;
-        outline: none !important;
     }
 
-    /* 3. Estado Hover (al pasar el ratón) */
-    .fc .fc-button:hover,
-    .fc .fc-button-primary:hover,
-    .fc .fc-today-button:hover {
-        background-color: var(--fc-button-hover-bg-color) !important;
-        border-color: var(--fc-button-hover-border-color) !important;
-        color: #ffffff !important;
+    /* 3. AL PASAR EL CURSOR POR ENCIMA (HOVER) */
+    .fc .fc-button-primary:hover {
+        background-color: #d93838 !important;  /* Color hover inactivo */
+        border-color: #d93838 !important;
     }
-
-    /* 4. Estado Activo o Seleccionado (ej: cuando la vista 'Mes' está activa) */
-    .fc .fc-button-primary:not(:disabled):active,
-    .fc .fc-button-primary:not(:disabled).fc-button-active,
-    .fc .fc-button-primary:focus {
-        background-color: var(--fc-button-active-bg-color) !important;
-        border-color: var(--fc-button-active-border-color) !important;
-        box-shadow: 0 0 0 0.2rem rgba(118, 74, 223, 0.4) !important;
+    .fc .fc-button-primary.fc-button-active:hover {
+        background-color: #111827 !important;  /* Color hover activo */
+        border-color: #111827 !important;
     }
 
     /* -----------------------------------------------------------
-       RESTO DE ESTILOS DE LA INTERFAZ
+       ESTILOS ADICIONALES DEL CALENDARIO
     ----------------------------------------------------------- */
     .fc-toolbar-title {
         color: #2D006B !important;
