@@ -106,7 +106,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
 
     /* ENCABEZADO DE LOS DÍAS (Lunes, Martes...) CON FONDO VIOLETA Y TEXTO BLANCO */
     .fc-col-header-cell {
-        background-color: #8A2BE2 !important;
+        background-color: #6b78ed !important;
         border-color: #7a22cc !important;
         padding: 12px 0 !important;
     }
