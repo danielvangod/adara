@@ -53,9 +53,56 @@ ICONOS_CATEGORIAS = {
 # ===================================================================
 # [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (DENTRO DEL IFRAME)
 # ===================================================================
-# Cadena CSS que se inyecta en la clave 'customCss' de las opciones de la librería
 CSS_CALENDARIO_PERSONALIZADO = """
-    /* Título del mes en minúsculas con ícono de calendario */
+    /* -----------------------------------------------------------
+       CAMBIO MANUAL DE COLORES DE BOTONES
+       (Modifica los códigos Hexadecimales aquí)
+    ----------------------------------------------------------- */
+    
+    /* 1. Definición global de variables de botones para FullCalendar */
+    :root {
+        --fc-button-bg-color: #764adf !important;          /* Color de fondo normal */
+        --fc-button-border-color: #764adf !important;      /* Color del borde normal */
+        --fc-button-hover-bg-color: #5d35b8 !important;    /* Color al pasar el cursor (hover) */
+        --fc-button-hover-border-color: #5d35b8 !important;/* Borde al pasar el cursor */
+        --fc-button-active-bg-color: #48239e !important;   /* Color al hacer clic / vista activa */
+        --fc-button-active-border-color: #48239e !important;
+    }
+
+    /* 2. Forzar estilos en todos los botones (Mes, Semana, Agenda, Hoy, Flechas) */
+    .fc .fc-button,
+    .fc .fc-button-primary,
+    .fc .fc-today-button {
+        background-color: var(--fc-button-bg-color) !important;
+        border-color: var(--fc-button-border-color) !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+        font-weight: bold !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    /* 3. Estado Hover (al pasar el ratón) */
+    .fc .fc-button:hover,
+    .fc .fc-button-primary:hover,
+    .fc .fc-today-button:hover {
+        background-color: var(--fc-button-hover-bg-color) !important;
+        border-color: var(--fc-button-hover-border-color) !important;
+        color: #ffffff !important;
+    }
+
+    /* 4. Estado Activo o Seleccionado (ej: cuando la vista 'Mes' está activa) */
+    .fc .fc-button-primary:not(:disabled):active,
+    .fc .fc-button-primary:not(:disabled).fc-button-active,
+    .fc .fc-button-primary:focus {
+        background-color: var(--fc-button-active-bg-color) !important;
+        border-color: var(--fc-button-active-border-color) !important;
+        box-shadow: 0 0 0 0.2rem rgba(118, 74, 223, 0.4) !important;
+    }
+
+    /* -----------------------------------------------------------
+       RESTO DE ESTILOS DE LA INTERFAZ
+    ----------------------------------------------------------- */
     .fc-toolbar-title {
         color: #2D006B !important;
         font-weight: 800 !important;
@@ -66,41 +113,9 @@ CSS_CALENDARIO_PERSONALIZADO = """
         content: "📅 ";
         margin-right: 6px;
     }
-    
-    /* Botones principales (Mes, Semana, Agenda, Flechas < >) */
-    .fc-button-primary {
-        background-color: #9966FF !important;
-        border-color: #764adf !important;
-        border-radius: 12px !important;
-        color: white !important;
-        font-weight: bold !important;
-        padding: 8px 16px !important;
-        box-shadow: 0px 2px 6px rgba(118, 74, 223, 0.3) !important;
-    }
-    .fc-button-primary:hover {
-        background-color: #5d35b8 !important;
-        border-color: #5d35b8 !important;
-    }
-    
-    /* Botón "Hoy" */
-    .fc-today-button {
-        background-color: #764adf !important;
-        border-color: #764adf !important;
-        color: white !important;
-        border-radius: 12px !important;
-        opacity: 0.9;
-    }
-    .fc-today-button:hover {
-        opacity: 1 !important;
-        background-color: #5d35b8 !important;
-    }
-    
-    /* Fondo de la cuadrícula */
     .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
         background-color: #f5f2fd !important;
     }
-    
-    /* Encabezado con los días de la semana */
     .fc-col-header-cell {
         background-color: #f5f2fd !important;
         padding: 10px 0 !important;
@@ -112,8 +127,6 @@ CSS_CALENDARIO_PERSONALIZADO = """
         text-transform: uppercase !important;
         font-size: 0.85rem !important;
     }
-    
-    /* Celdas y líneas divisorias de los días */
     .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th, .fc-scrollgrid {
         border: 1px solid #e2d9f8 !important;
     }
@@ -122,13 +135,9 @@ CSS_CALENDARIO_PERSONALIZADO = """
         font-weight: bold !important;
         padding: 8px !important;
     }
-
-    /* Resaltado del día de hoy */
     .fc-day-today {
         background-color: #eae3fb !important;
     }
-
-    /* Bloques de Eventos */
     .fc-event {
         border-radius: 10px !important;
         border: none !important;
