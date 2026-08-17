@@ -435,10 +435,17 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON CUSTOM_CSS CORREGIDO)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON TÍTULO Y LETRAS GRANDES)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
+
+    # --- TÍTULO PRINCIPAL DE LA VISTA ---
+    st.title("📅 Calendario de Ausencias")
+    st.markdown("---")
+
+    # --- TÍTULO Y LEYENDA DE CATEGORÍAS ---
+    st.subheader("🏷️ Categorías de Permisos")
 
     cols = st.columns(6)
     for i, (cat, color) in enumerate(PALETA_COLORES.items()):
@@ -447,7 +454,7 @@ def vista_calendario(df_permisos):
             f"""
             <div style="
                 background-color: white; 
-                padding: 8px 12px; 
+                padding: 10px 14px; 
                 border-radius: 12px; 
                 border: 1px solid #EAEAEA; 
                 text-align: center; 
@@ -457,8 +464,8 @@ def vista_calendario(df_permisos):
                 justify-content: center;
                 gap: 8px;
             ">
-                <span style="background-color: {color}; color: white; padding: 4px 8px; border-radius: 8px; font-size: 12px;">{icono}</span>
-                <span style="font-size: 13px; font-weight: bold; color: #333;">{cat}</span>
+                <span style="background-color: {color}; color: white; padding: 6px 10px; border-radius: 8px; font-size: 16px;">{icono}</span>
+                <span style="font-size: 17px; font-weight: 800; color: #2D006B;">{cat}</span>
             </div>
             """, 
             unsafe_allow_html=True
@@ -466,6 +473,7 @@ def vista_calendario(df_permisos):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # Detalle del evento seleccionado
     if st.session_state.get("evento_seleccionado"):
         props = st.session_state["evento_seleccionado"]
         f_ini_fmt = fmt_fecha(props.get('fecha_inicio'))
@@ -502,6 +510,7 @@ def vista_calendario(df_permisos):
 
         st.markdown("---")
 
+    # Renderizado del calendario
     if not df_permisos.empty:
         eventos = []
         for idx, row in df_permisos.iterrows():
@@ -549,13 +558,12 @@ def vista_calendario(df_permisos):
         
         key_actual = f"cal_permisos_{st.session_state['cal_key']}"
         
-        # Inyección de seguridad del CSS
         st.markdown(f"<style>{CSS_CALENDARIO_PERSONALIZADO}</style>", unsafe_allow_html=True)
         
         cal_resultado = calendar(
             events=eventos, 
             options=opciones_cal,
-            custom_css=CSS_CALENDARIO_PERSONALIZADO,  # <-- CORREGIDO: Usando custom_css
+            custom_css=CSS_CALENDARIO_PERSONALIZADO,
             key=key_actual
         )
         
@@ -567,7 +575,6 @@ def vista_calendario(df_permisos):
                 st.rerun()
     else:
         st.info("No hay permisos registrados para mostrar en el calendario.")
-
 
 # ===================================================================
 # [SEGMENTO 10]: VISTA 4 - HISTORIAL COMPLETO
