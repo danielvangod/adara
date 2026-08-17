@@ -50,7 +50,7 @@ ICONOS_CATEGORIAS = {
 
 
 # ===================================================================
-# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (PALETA EN VIOLETA)
+# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (PALETA VIOLETA + ENCABEZADO)
 # ===================================================================
 CSS_CALENDARIO_PERSONALIZADO = """
     /* Forzar variables de color violeta en el contenedor raíz */
@@ -104,20 +104,22 @@ CSS_CALENDARIO_PERSONALIZADO = """
         margin-right: 6px;
     }
 
-    /* Cuadrícula del calendario */
-    .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
-        background-color: #f5f2fd !important;
-    }
+    /* ENCABEZADO DE LOS DÍAS (Lunes, Martes...) CON FONDO VIOLETA Y TEXTO BLANCO */
     .fc-col-header-cell {
-        background-color: #f5f2fd !important;
-        padding: 10px 0 !important;
-        border-color: #e2d9f8 !important;
+        background-color: #8A2BE2 !important;
+        border-color: #7a22cc !important;
+        padding: 12px 0 !important;
     }
     .fc-col-header-cell-cushion {
-        color: #4c1185 !important;
+        color: #ffffff !important;
         font-weight: bold !important;
-        text-transform: uppercase !important;
-        font-size: 0.85rem !important;
+        text-transform: capitalize !important;
+        font-size: 1rem !important;
+    }
+
+    /* Cuadrícula interna del calendario */
+    .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
+        background-color: #f5f2fd !important;
     }
     .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th, .fc-scrollgrid {
         border: 1px solid #e2d9f8 !important;
@@ -436,7 +438,7 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON ETIQUETAS AMPLIADAS)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (NOMBRES DE DÍAS COMPLETOS)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
@@ -538,6 +540,7 @@ def vista_calendario(df_permisos):
             
         opciones_cal = {
             "locale": "es",
+            "dayHeaderFormat": {"weekday": "long"},  # <-- Muestra el nombre del día completo (Lunes, Martes...)
             "headerToolbar": {
                 "left": "prev,next today",
                 "center": "title",
