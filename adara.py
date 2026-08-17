@@ -59,8 +59,8 @@ CSS_CALENDARIO_PERSONALIZADO = """
     
     /* 1. BOTONES INACTIVOS (Semana, Agenda, Flechas) */
     .fc .fc-button-primary:not(.fc-button-active) {
-        background-color: #ff4b4b !important;  /* Cambia este Hexadecimal */
-        border-color: #ff4b4b !important;      /* Borde igual al fondo */
+        background-color: #6b89ed !important;  /* Cambia este Hexadecimal */
+        border-color: #6b89ed !important;      /* Borde igual al fondo */
         color: #ffffff !important;             /* Color de texto */
     }
 
