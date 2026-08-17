@@ -55,7 +55,7 @@ ICONOS_CATEGORIAS = {
 CSS_CALENDARIO_PERSONALIZADO = """
     /* Forzar variables de color violeta en el contenedor raíz */
     .fc {
-        --fc-button-bg-color: #8A2BE2 !important;          /* Violeta principal */
+        --fc-button-bg-color: #6b78ed !important;          /* Violeta principal */
         --fc-button-border-color: #7a22cc !important;      /* Borde violeta */
         --fc-button-hover-bg-color: #6a1bb8 !important;    /* Violeta oscuro al pasar el mouse */
         --fc-button-hover-border-color: #59169c !important;
