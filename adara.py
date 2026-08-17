@@ -68,7 +68,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
     .fc .fc-button,
     .fc .fc-button-primary,
     .fc .fc-button-primary:disabled {
-        background-color: #8A2BE2 !important;
+        background-color: #6b78ed !important;
         border-color: #7a22cc !important;
         color: #ffffff !important;
         opacity: 1 !important;
