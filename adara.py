@@ -441,7 +441,7 @@ def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
     # --- TÍTULO PRINCIPAL DE LA VISTA ---
-    st.title("📅 Calendario de Ausencias")
+    st.title("📅 Calendario de Permisos al Personal")
     st.markdown("---")
 
     # --- TÍTULO Y LEYENDA DE CATEGORÍAS ---
