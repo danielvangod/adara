@@ -50,102 +50,52 @@ ICONOS_CATEGORIAS = {
 }
 
 # ===================================================================
-# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (DENTRO DEL IFRAME)
+# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (PALETA VIOLETA)
 # ===================================================================
-# Inyectamos la etiqueta <style> completa para forzar la carga dentro del iframe
 CSS_CALENDARIO_PERSONALIZADO = """
-<style>
-    /* -----------------------------------------------------------
-       VARIABLES GLOBALES DE FULLCALENDAR (FORZADO)
-    ----------------------------------------------------------- */
-    :root {
+    /* Forzar variables de color violeta en el contenedor raíz del calendario */
+    .fc {
+        --fc-button-bg-color: #8A2BE2 !important;          /* Violeta principal */
+        --fc-button-border-color: #7a22cc !important;      /* Borde violeta */
+        --fc-button-hover-bg-color: #6a1bb8 !important;    /* Violeta más oscuro al pasar el mouse */
+        --fc-button-hover-border-color: #59169c !important;
+        --fc-button-active-bg-color: #4c1185 !important;   /* Violeta profundo para el botón activo (ej. "Mes") */
+        --fc-button-active-border-color: #3e0d6d !important;
         --fc-button-text-color: #ffffff !important;
-        --fc-button-bg-color: #764adf !important;         /* COLOR BOTÓN INACTIVO (Ej: morado) */
-        --fc-button-border-color: #764adf !important;     /* Borde botón inactivo */
-        
-        --fc-button-hover-bg-color: #5d35b8 !important;   /* COLOR AL PASAR EL MOUSE */
-        --fc-button-hover-border-color: #5d35b8 !important;
-        
-        --fc-button-active-bg-color: #6b89ed !important;  /* COLOR BOTÓN ACTIVO / SELECCIONADO */
-        --fc-button-active-border-color: #6b89ed !important;
     }
 
-    /* -----------------------------------------------------------
-       REGLAS DIRECTAS CON MÁXIMA PRIORIDAD (!important)
-    ----------------------------------------------------------- */
-    
-    /* 1. Botones Normales / Inactivos (Semana, Agenda, Flechas < >) */
+    /* Botones inactivos (Semana, Agenda, Flechas) */
+    .fc .fc-button,
     .fc .fc-button-primary,
-    .fc .fc-button {
-        background-color: var(--fc-button-bg-color) !important;
-        border-color: var(--fc-button-border-color) !important;
+    .fc .fc-button-primary:disabled {
+        background-color: #8A2BE2 !important;
+        border-color: #7a22cc !important;
+        color: #ffffff !important;
+        opacity: 1 !important;
+    }
+
+    /* Botón al pasar el cursor (Hover) */
+    .fc .fc-button-primary:hover {
+        background-color: #6a1bb8 !important;
+        border-color: #59169c !important;
+        color: #ffffff !important;
+    }
+
+    /* Botón seleccionado / activo (ejemplo: "Mes") */
+    .fc .fc-button-primary.fc-button-active,
+    .fc .fc-button-primary:active,
+    .fc .fc-button-primary:focus {
+        background-color: #4c1185 !important;
+        border-color: #3e0d6d !important;
         color: #ffffff !important;
         box-shadow: none !important;
     }
 
-    /* 2. Botón Activo / Seleccionado (Ej: "Mes" cuando estás viéndolo) */
-    .fc .fc-button-primary.fc-button-active,
-    .fc .fc-button-primary:active,
-    .fc .fc-button-active {
-        background-color: var(--fc-button-active-bg-color) !important;
-        border-color: var(--fc-button-active-border-color) !important;
-        color: #ffffff !important;
-        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3) !important;
-    }
-
-    /* 3. Estado Hover (al pasar el mouse) */
-    .fc .fc-button-primary:hover {
-        background-color: var(--fc-button-hover-bg-color) !important;
-        border-color: var(--fc-button-hover-border-color) !important;
-    }
-
-    /* -----------------------------------------------------------
-       OTROS ESTILOS VISUALES
-    ----------------------------------------------------------- */
+    /* Título y textos */
     .fc-toolbar-title {
-        color: #2D006B !important;
+        color: #4c1185 !important;
         font-weight: 800 !important;
-        font-size: 1.8rem !important;
-        text-transform: lowercase !important;
     }
-    .fc-toolbar-title::before {
-        content: "📅 ";
-        margin-right: 6px;
-    }
-    .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
-        background-color: #f5f2fd !important;
-    }
-    .fc-col-header-cell {
-        background-color: #f5f2fd !important;
-        padding: 10px 0 !important;
-        border-color: #e2d9f8 !important;
-    }
-    .fc-col-header-cell-cushion {
-        color: #2D006B !important;
-        font-weight: bold !important;
-        text-transform: uppercase !important;
-        font-size: 0.85rem !important;
-    }
-    .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th, .fc-scrollgrid {
-        border: 1px solid #e2d9f8 !important;
-    }
-    .fc-daygrid-day-number {
-        color: #2D006B !important;
-        font-weight: bold !important;
-        padding: 8px !important;
-    }
-    .fc-day-today {
-        background-color: #eae3fb !important;
-    }
-    .fc-event {
-        border-radius: 10px !important;
-        border: none !important;
-        padding: 4px 8px !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        box-shadow: 0px 2px 4px rgba(0,0,0,0.08) !important;
-    }
-</style>
 """
 # ===================================================================
 # [SEGMENTO 4]: ESTILOS CSS GLOBALES (OCULTAR ELEMENTOS DE STREAMLIT)
