@@ -52,39 +52,55 @@ ICONOS_CATEGORIAS = {
 # ===================================================================
 # [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (DENTRO DEL IFRAME)
 # ===================================================================
+# Inyectamos la etiqueta <style> completa para forzar la carga dentro del iframe
 CSS_CALENDARIO_PERSONALIZADO = """
+<style>
     /* -----------------------------------------------------------
-       CAMBIO MANUAL DE COLORES DE BOTONES (EDITA AQUÍ)
+       VARIABLES GLOBALES DE FULLCALENDAR (FORZADO)
     ----------------------------------------------------------- */
-    
-    /* 1. BOTONES INACTIVOS (Semana, Agenda, Flechas) */
-    .fc .fc-button-primary:not(.fc-button-active) {
-        background-color: #6b89ed !important;  /* Cambia este Hexadecimal */
-        border-color: #6b89ed !important;      /* Borde igual al fondo */
-        color: #ffffff !important;             /* Color de texto */
+    :root {
+        --fc-button-text-color: #ffffff !important;
+        --fc-button-bg-color: #764adf !important;         /* COLOR BOTÓN INACTIVO (Ej: morado) */
+        --fc-button-border-color: #764adf !important;     /* Borde botón inactivo */
+        
+        --fc-button-hover-bg-color: #5d35b8 !important;   /* COLOR AL PASAR EL MOUSE */
+        --fc-button-hover-border-color: #5d35b8 !important;
+        
+        --fc-button-active-bg-color: #2D006B !important;  /* COLOR BOTÓN ACTIVO / SELECCIONADO */
+        --fc-button-active-border-color: #2D006B !important;
     }
 
-    /* 2. BOTÓN ACTIVO / SELECCIONADO (Ejemplo: "Mes") */
-    .fc .fc-button-primary.fc-button-active,
-    .fc .fc-button-primary:active {
-        background-color: #1f2937 !important;  /* Cambia este Hexadecimal */
-        border-color: #1f2937 !important;      /* Borde igual al fondo */
-        color: #ffffff !important;             /* Color de texto */
+    /* -----------------------------------------------------------
+       REGLAS DIRECTAS CON MÁXIMA PRIORIDAD (!important)
+    ----------------------------------------------------------- */
+    
+    /* 1. Botones Normales / Inactivos (Semana, Agenda, Flechas < >) */
+    .fc .fc-button-primary,
+    .fc .fc-button {
+        background-color: var(--fc-button-bg-color) !important;
+        border-color: var(--fc-button-border-color) !important;
+        color: #ffffff !important;
         box-shadow: none !important;
     }
 
-    /* 3. AL PASAR EL CURSOR POR ENCIMA (HOVER) */
-    .fc .fc-button-primary:hover {
-        background-color: #d93838 !important;  /* Color hover inactivo */
-        border-color: #d93838 !important;
+    /* 2. Botón Activo / Seleccionado (Ej: "Mes" cuando estás viéndolo) */
+    .fc .fc-button-primary.fc-button-active,
+    .fc .fc-button-primary:active,
+    .fc .fc-button-active {
+        background-color: var(--fc-button-active-bg-color) !important;
+        border-color: var(--fc-button-active-border-color) !important;
+        color: #ffffff !important;
+        box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3) !important;
     }
-    .fc .fc-button-primary.fc-button-active:hover {
-        background-color: #111827 !important;  /* Color hover activo */
-        border-color: #111827 !important;
+
+    /* 3. Estado Hover (al pasar el mouse) */
+    .fc .fc-button-primary:hover {
+        background-color: var(--fc-button-hover-bg-color) !important;
+        border-color: var(--fc-button-hover-border-color) !important;
     }
 
     /* -----------------------------------------------------------
-       ESTILOS ADICIONALES DEL CALENDARIO
+       OTROS ESTILOS VISUALES
     ----------------------------------------------------------- */
     .fc-toolbar-title {
         color: #2D006B !important;
@@ -129,9 +145,8 @@ CSS_CALENDARIO_PERSONALIZADO = """
         font-weight: 600 !important;
         box-shadow: 0px 2px 4px rgba(0,0,0,0.08) !important;
     }
+</style>
 """
-
-
 # ===================================================================
 # [SEGMENTO 4]: ESTILOS CSS GLOBALES (OCULTAR ELEMENTOS DE STREAMLIT)
 # ===================================================================
