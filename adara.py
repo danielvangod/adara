@@ -29,7 +29,6 @@ def obtener_timestamp_actual():
 # ===================================================================
 # [SEGMENTO 2]: CONFIGURACIÓN DE COLORES Y PALETA VISUAL
 # ===================================================================
-# Edita aquí los colores Hexadecimales para los eventos del calendario
 PALETA_COLORES = {
     "Médica": "#36A2EB",         # Azul
     "Vacaciones": "#4BC0C0",      # Verde turquesa
@@ -39,7 +38,6 @@ PALETA_COLORES = {
     "Otro": "#8E44AD"             # Violeta Oscuro
 }
 
-# Edita aquí los íconos asociados a cada categoría
 ICONOS_CATEGORIAS = {
     "Médica": "➕", 
     "Vacaciones": "🧳", 
@@ -49,17 +47,18 @@ ICONOS_CATEGORIAS = {
     "Otro": "💬"
 }
 
+
 # ===================================================================
-# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (PALETA VIOLETA)
+# [SEGMENTO 3]: ESTILOS CSS DEL CALENDARIO (PALETA EN VIOLETA)
 # ===================================================================
 CSS_CALENDARIO_PERSONALIZADO = """
-    /* Forzar variables de color violeta en el contenedor raíz del calendario */
+    /* Forzar variables de color violeta en el contenedor raíz */
     .fc {
         --fc-button-bg-color: #8A2BE2 !important;          /* Violeta principal */
         --fc-button-border-color: #7a22cc !important;      /* Borde violeta */
-        --fc-button-hover-bg-color: #6a1bb8 !important;    /* Violeta más oscuro al pasar el mouse */
+        --fc-button-hover-bg-color: #6a1bb8 !important;    /* Violeta oscuro al pasar el mouse */
         --fc-button-hover-border-color: #59169c !important;
-        --fc-button-active-bg-color: #4c1185 !important;   /* Violeta profundo para el botón activo (ej. "Mes") */
+        --fc-button-active-bg-color: #4c1185 !important;   /* Violeta profundo para botón activo */
         --fc-button-active-border-color: #3e0d6d !important;
         --fc-button-text-color: #ffffff !important;
     }
@@ -72,6 +71,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
         border-color: #7a22cc !important;
         color: #ffffff !important;
         opacity: 1 !important;
+        border-radius: 8px !important;
     }
 
     /* Botón al pasar el cursor (Hover) */
@@ -81,7 +81,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
         color: #ffffff !important;
     }
 
-    /* Botón seleccionado / activo (ejemplo: "Mes") */
+    /* Botón seleccionado / activo (Ejemplo: "Mes") */
     .fc .fc-button-primary.fc-button-active,
     .fc .fc-button-primary:active,
     .fc .fc-button-primary:focus {
@@ -91,18 +91,60 @@ CSS_CALENDARIO_PERSONALIZADO = """
         box-shadow: none !important;
     }
 
-    /* Título y textos */
+    /* Título del mes */
     .fc-toolbar-title {
         color: #4c1185 !important;
         font-weight: 800 !important;
+        font-size: 1.8rem !important;
+        text-transform: lowercase !important;
+    }
+    .fc-toolbar-title::before {
+        content: "📅 ";
+        margin-right: 6px;
+    }
+
+    /* Cuadrícula del calendario */
+    .fc-daygrid-body, .fc-scrollgrid-sync-table, .fc-view-harness {
+        background-color: #f5f2fd !important;
+    }
+    .fc-col-header-cell {
+        background-color: #f5f2fd !important;
+        padding: 10px 0 !important;
+        border-color: #e2d9f8 !important;
+    }
+    .fc-col-header-cell-cushion {
+        color: #4c1185 !important;
+        font-weight: bold !important;
+        text-transform: uppercase !important;
+        font-size: 0.85rem !important;
+    }
+    .fc-daygrid-day, .fc-theme-standard td, .fc-theme-standard th, .fc-scrollgrid {
+        border: 1px solid #e2d9f8 !important;
+    }
+    .fc-daygrid-day-number {
+        color: #4c1185 !important;
+        font-weight: bold !important;
+        padding: 8px !important;
+    }
+    .fc-day-today {
+        background-color: #eae3fb !important;
+    }
+    .fc-event {
+        border-radius: 10px !important;
+        border: none !important;
+        padding: 4px 8px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.08) !important;
     }
 """
+
+
 # ===================================================================
-# [SEGMENTO 4]: ESTILOS CSS GLOBALES (OCULTAR ELEMENTOS DE STREAMLIT)
+# [SEGMENTO 4]: ESTILOS CSS GLOBALES DE STREAMLIT
 # ===================================================================
 st.markdown("""
     <style>
-    /* Ocultar el icono/enlace de GitHub en la barra superior */
     [data-testid="stHeader"] a[href*="github.com"] {
         display: none !important;
         visibility: hidden !important;
@@ -112,7 +154,7 @@ st.markdown("""
 
 
 # ===================================================================
-# [SEGMENTO 5]: INICIALIZACIÓN DEL ESTADO DE SESIÓN Y CONEXIÓN
+# [SEGMENTO 5]: INICIALIZACIÓN DE SESIÓN Y CONEXIÓN
 # ===================================================================
 if "menu_opcion" not in st.session_state:
     st.session_state["menu_opcion"] = "🏠 Inicio (Permisos de Hoy)"
@@ -129,7 +171,6 @@ if "evento_seleccionado" not in st.session_state:
 if "mensaje_accion" not in st.session_state:
     st.session_state["mensaje_accion"] = None
 
-# Conexión a la hoja de cálculo
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 
@@ -137,7 +178,6 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # [SEGMENTO 6]: FUNCIONES DE BASE DE DATOS Y UTILIDADES
 # ===================================================================
 def fmt_fecha(fecha_val, con_hora=False):
-    """Convierte una fecha o timestamp a formato legible dd/mm/yyyy."""
     if pd.isna(fecha_val) or not fecha_val or str(fecha_val).strip() == "":
         return "-"
     try:
@@ -241,7 +281,7 @@ def sincronizar_fecha_fin(key_ini, key_fin):
 
 
 # ===================================================================
-# [SEGMENTO 7]: VISTA 1 - INICIO (PERMISOS DE HOY)
+# [SEGMENTO 7]: VISTA 1 - INICIO
 # ===================================================================
 def vista_inicio(df_permisos):
     mostrar_mensaje_alerta()
@@ -400,7 +440,6 @@ def vista_registrar_permiso(df_permisos):
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
-    # Leyenda superior generada dinámicamente desde el Segmento 2
     cols = st.columns(6)
     for i, (cat, color) in enumerate(PALETA_COLORES.items()):
         icono = ICONOS_CATEGORIAS.get(cat, "📌")
@@ -427,7 +466,6 @@ def vista_calendario(df_permisos):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Detalle del evento seleccionado
     if st.session_state.get("evento_seleccionado"):
         props = st.session_state["evento_seleccionado"]
         f_ini_fmt = fmt_fecha(props.get('fecha_inicio'))
@@ -464,7 +502,6 @@ def vista_calendario(df_permisos):
 
         st.markdown("---")
 
-    # Renderizado del calendario
     if not df_permisos.empty:
         eventos = []
         for idx, row in df_permisos.iterrows():
@@ -477,8 +514,8 @@ def vista_calendario(df_permisos):
                 "title": f"{icono} {row['Empleado']} ({row['Tipo']})",
                 "start": f_inicio,
                 "end": f_fin_cal,
-                "backgroundColor": PALETA_COLORES.get(row['Tipo'], "#764adf"),
-                "borderColor": PALETA_COLORES.get(row['Tipo'], "#764adf"),
+                "backgroundColor": PALETA_COLORES.get(row['Tipo'], "#8A2BE2"),
+                "borderColor": PALETA_COLORES.get(row['Tipo'], "#8A2BE2"),
                 "textColor": "#FFFFFF",
                 "extendedProps": {
                     "id": str(idx),
@@ -493,7 +530,6 @@ def vista_calendario(df_permisos):
                 }
             })
             
-        # Pasar 'customCss' DENTRO de opciones_cal para evitar el TypeError
         opciones_cal = {
             "locale": "es",
             "headerToolbar": {
@@ -508,15 +544,15 @@ def vista_calendario(df_permisos):
                 "list": "Agenda"
             },
             "initialView": "dayGridMonth",
-            "selectable": True,
-            "customCss": CSS_CALENDARIO_PERSONALIZADO
+            "selectable": True
         }
         
         key_actual = f"cal_permisos_{st.session_state['cal_key']}"
         
         cal_resultado = calendar(
             events=eventos, 
-            options=opciones_cal, 
+            options=opciones_cal,
+            customCss=CSS_CALENDARIO_PERSONALIZADO,
             key=key_actual
         )
         
