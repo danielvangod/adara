@@ -61,8 +61,8 @@ CSS_CALENDARIO_PERSONALIZADO = """
     
     /* 1. Definición global de variables de botones para FullCalendar */
     :root {
-        --fc-button-bg-color: #764adf !important;          /* Color de fondo normal */
-        --fc-button-border-color: #764adf !important;      /* Color del borde normal */
+        --fc-button-bg-color: #9966FF !important;          /* Color de fondo normal */
+        --fc-button-border-color: #8E44A !important;      /* Color del borde normal */
         --fc-button-hover-bg-color: #5d35b8 !important;    /* Color al pasar el cursor (hover) */
         --fc-button-hover-border-color: #5d35b8 !important;/* Borde al pasar el cursor */
         --fc-button-active-bg-color: #48239e !important;   /* Color al hacer clic / vista activa */
