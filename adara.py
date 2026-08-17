@@ -66,8 +66,8 @@ CSS_CALENDARIO_PERSONALIZADO = """
         --fc-button-hover-bg-color: #5d35b8 !important;   /* COLOR AL PASAR EL MOUSE */
         --fc-button-hover-border-color: #5d35b8 !important;
         
-        --fc-button-active-bg-color: #2D006B !important;  /* COLOR BOTÓN ACTIVO / SELECCIONADO */
-        --fc-button-active-border-color: #2D006B !important;
+        --fc-button-active-bg-color: #6b89ed !important;  /* COLOR BOTÓN ACTIVO / SELECCIONADO */
+        --fc-button-active-border-color: #6b89ed !important;
     }
 
     /* -----------------------------------------------------------
