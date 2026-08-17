@@ -443,7 +443,7 @@ def vista_registrar_permiso(df_permisos):
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
-    st.title("📅 Calendario de Ausencias")
+    st.title("📅 Calendario de Control de Permisos de Empleados")
     st.markdown("---")
 
     st.subheader("🏷️ Categorías de Permisos")
