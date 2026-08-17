@@ -69,7 +69,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
     
     /* Botones principales (Mes, Semana, Agenda, Flechas < >) */
     .fc-button-primary {
-        background-color: #764adf !important;
+        background-color: #6b89ed !important;
         border-color: #764adf !important;
         border-radius: 12px !important;
         color: white !important;
