@@ -64,12 +64,12 @@ CSS_CALENDARIO_PERSONALIZADO = """
     }
     .fc-toolbar-title::before {
         content: "📅 ";
-        margin-right: 12px;
+        margin-right: 6px;
     }
     
     /* Botones principales (Mes, Semana, Agenda, Flechas < >) */
     .fc-button-primary {
-        background-color: #6b89ed !important;
+        background-color: #9966FF !important;
         border-color: #764adf !important;
         border-radius: 12px !important;
         color: white !important;
