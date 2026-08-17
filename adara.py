@@ -64,7 +64,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
     }
     .fc-toolbar-title::before {
         content: "📅 ";
-        margin-right: 6px;
+        margin-right: 12px;
     }
     
     /* Botones principales (Mes, Semana, Agenda, Flechas < >) */
