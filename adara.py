@@ -438,12 +438,22 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (NOMBRES DE DÍAS COMPLETOS)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON LOGO)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
-    st.title("📅 Calendario de Control de Permisos de Empleados")
+    # ---------------------------------------------------------------
+    # CARGAR LOGO SUBIDO A GITHUB
+    # ---------------------------------------------------------------
+    # Cambia "logo.png" por el nombre exacto de tu archivo en GitHub
+    ruta_logo = "logo.png" 
+    
+    col_logo, _ = st.columns([0.3, 0.7])
+    with col_logo:
+        st.image(ruta_logo, width=180) # Ajusta el tamaño con width si es necesario
+
+    st.title("📅 Calendario de Ausencias")
     st.markdown("---")
 
     st.subheader("🏷️ Categorías de Permisos")
