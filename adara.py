@@ -1,4 +1,5 @@
 import io
+import os
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -55,7 +56,7 @@ ICONOS_CATEGORIAS = {
 CSS_CALENDARIO_PERSONALIZADO = """
     /* Forzar variables de color violeta en el contenedor raíz */
     .fc {
-        --fc-button-bg-color: #6b78ed !important;          /* Violeta principal */
+        --fc-button-bg-color: #8A2BE2 !important;          /* Violeta principal */
         --fc-button-border-color: #7a22cc !important;      /* Borde violeta */
         --fc-button-hover-bg-color: #6a1bb8 !important;    /* Violeta oscuro al pasar el mouse */
         --fc-button-hover-border-color: #59169c !important;
@@ -68,7 +69,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
     .fc .fc-button,
     .fc .fc-button-primary,
     .fc .fc-button-primary:disabled {
-        background-color: #6b78ed !important;
+        background-color: #8A2BE2 !important;
         border-color: #7a22cc !important;
         color: #ffffff !important;
         opacity: 1 !important;
@@ -106,7 +107,7 @@ CSS_CALENDARIO_PERSONALIZADO = """
 
     /* ENCABEZADO DE LOS DÍAS (Lunes, Martes...) CON FONDO VIOLETA Y TEXTO BLANCO */
     .fc-col-header-cell {
-        background-color: #6b78ed !important;
+        background-color: #8A2BE2 !important;
         border-color: #7a22cc !important;
         padding: 12px 0 !important;
     }
@@ -438,20 +439,19 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON LOGO)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON LOGO Y CATEGORÍAS COMPACTAS)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
     # ---------------------------------------------------------------
-    # CARGAR LOGO SUBIDO A GITHUB
+    # CARGAR LOGO MEDIANTE URL RAW DE GITHUB
     # ---------------------------------------------------------------
-    # Cambia "logo.png" por el nombre exacto de tu archivo en GitHub
-    ruta_logo = "logo1.png" 
+    ruta_logo = "https://raw.githubusercontent.com/danielvangod/adara/main/logo1.jpeg"
     
     col_logo, _ = st.columns([0.3, 0.7])
     with col_logo:
-        st.image(ruta_logo, width=180) # Ajusta el tamaño con width si es necesario
+        st.image(ruta_logo, width=180)
 
     st.title("📅 Calendario de Ausencias")
     st.markdown("---")
@@ -465,7 +465,7 @@ def vista_calendario(df_permisos):
             f"""
             <div style="
                 background-color: white; 
-                padding: 10px 14px; 
+                padding: 6px 8px; 
                 border-radius: 12px; 
                 border: 1px solid #EAEAEA; 
                 text-align: center; 
@@ -473,10 +473,10 @@ def vista_calendario(df_permisos):
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
+                gap: 6px;
             ">
-                <span style="background-color: {color}; color: white; padding: 6px 10px; border-radius: 8px; font-size: 16px;">{icono}</span>
-                <span style="font-size: 15px; font-weight: 800; color: #2D006B;">{cat}</span>
+                <span style="background-color: {color}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 13px;">{icono}</span>
+                <span style="font-size: 13px; font-weight: 700; color: #2D006B;">{cat}</span>
             </div>
             """, 
             unsafe_allow_html=True
@@ -550,7 +550,7 @@ def vista_calendario(df_permisos):
             
         opciones_cal = {
             "locale": "es",
-            "dayHeaderFormat": {"weekday": "long"},  # <-- Muestra el nombre del día completo (Lunes, Martes...)
+            "dayHeaderFormat": {"weekday": "long"},
             "headerToolbar": {
                 "left": "prev,next today",
                 "center": "title",
