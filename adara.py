@@ -452,9 +452,9 @@ def vista_calendario(df_permisos):
     # Tres columnas con la del medio más ancha para centrar la imagen
     col_izq, col_centro, col_der = st.columns([1, 2, 1])
     with col_centro:
-        st.image(ruta_logo, width=320, use_container_width=False) # <--- Ajusta width a tu gusto (ej: 300, 350, 400)
+        st.image(ruta_logo, width=520, use_container_width=False) # <--- Ajusta width a tu gusto (ej: 300, 350, 400)
 
-    st.title("📅 Calendario de Ausencias")
+    st.title("📅 Calendario de Control de Permisos")
     st.markdown("---")
 
     st.subheader("🏷️ Categorías de Permisos")
