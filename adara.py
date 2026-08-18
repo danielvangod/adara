@@ -439,19 +439,20 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (CON LOGO Y CATEGORÍAS COMPACTAS)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (LOGO CENTRADO Y MÁS GRANDE)
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
     # ---------------------------------------------------------------
-    # CARGAR LOGO MEDIANTE URL RAW DE GITHUB
+    # CARGAR LOGO CENTRADO Y MÁS GRANDE
     # ---------------------------------------------------------------
     ruta_logo = "https://raw.githubusercontent.com/danielvangod/adara/main/logo1.jpeg"
     
-    col_logo, _ = st.columns([0.3, 0.7])
-    with col_logo:
-        st.image(ruta_logo, width=180)
+    # Tres columnas con la del medio más ancha para centrar la imagen
+    col_izq, col_centro, col_der = st.columns([1, 2, 1])
+    with col_centro:
+        st.image(ruta_logo, width=320, use_container_width=False) # <--- Ajusta width a tu gusto (ej: 300, 350, 400)
 
     st.title("📅 Calendario de Ausencias")
     st.markdown("---")
@@ -585,8 +586,6 @@ def vista_calendario(df_permisos):
                 st.rerun()
     else:
         st.info("No hay permisos registrados para mostrar en el calendario.")
-
-
 # ===================================================================
 # [SEGMENTO 10]: VISTA 4 - HISTORIAL COMPLETO (FILTROS Y EXCEL)
 # ===================================================================
