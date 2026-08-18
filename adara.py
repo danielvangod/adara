@@ -447,7 +447,7 @@ def vista_calendario(df_permisos):
     # CARGAR LOGO SUBIDO A GITHUB
     # ---------------------------------------------------------------
     # Cambia "logo.png" por el nombre exacto de tu archivo en GitHub
-    ruta_logo = "logo.png" 
+    ruta_logo = "logo1.png" 
     
     col_logo, _ = st.columns([0.3, 0.7])
     with col_logo:
