@@ -439,22 +439,12 @@ def vista_registrar_permiso(df_permisos):
 
 
 # ===================================================================
-# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL (LOGO CENTRADO Y MÁS GRANDE)
+# [SEGMENTO 9]: VISTA 3 - CALENDARIO VISUAL
 # ===================================================================
 def vista_calendario(df_permisos):
     mostrar_mensaje_alerta()
 
-    # ---------------------------------------------------------------
-    # CARGAR LOGO CENTRADO Y MÁS GRANDE
-    # ---------------------------------------------------------------
-    ruta_logo = "https://raw.githubusercontent.com/danielvangod/adara/main/logo1.jpeg"
-    
-    # Tres columnas con la del medio más ancha para centrar la imagen
-    col_izq, col_centro, col_der = st.columns([1, 2, 1])
-    with col_centro:
-        st.image(ruta_logo, width=520, use_container_width=False) # <--- Ajusta width a tu gusto (ej: 300, 350, 400)
-
-    st.title("📅 Calendario de Control de Permisos")
+    st.title("📅 Calendario de Ausencias")
     st.markdown("---")
 
     st.subheader("🏷️ Categorías de Permisos")
@@ -586,6 +576,8 @@ def vista_calendario(df_permisos):
                 st.rerun()
     else:
         st.info("No hay permisos registrados para mostrar en el calendario.")
+
+
 # ===================================================================
 # [SEGMENTO 10]: VISTA 4 - HISTORIAL COMPLETO (FILTROS Y EXCEL)
 # ===================================================================
@@ -652,7 +644,24 @@ def vista_historial(df_permisos):
 # ===================================================================
 # [SEGMENTO 11]: CONTROLADOR PRINCIPAL Y MENÚ DE NAVEGACIÓN
 # ===================================================================
+def mostrar_logo():
+    """Dibuja el logo centrado en la parte superior para todas las vistas."""
+    ruta_logo = "https://raw.githubusercontent.com/danielvangod/adara/main/logo1.jpeg"
+    
+    col_izq, col_centro, col_der = st.columns([1, 2, 1])
+    with col_centro:
+        st.image(ruta_logo, width=320, use_container_width=False)
+
+
 def main():
+    # ---------------------------------------------------------------
+    # 1. LOGO PRINCIPAL (Se muestra en TODAS las secciones de la app)
+    # ---------------------------------------------------------------
+    mostrar_logo()
+
+    # ---------------------------------------------------------------
+    # 2. MENÚ DE NAVEGACIÓN Y CARGA DE DATOS
+    # ---------------------------------------------------------------
     st.sidebar.title("📌 Menú de Navegación")
     
     opciones_menu = [
@@ -670,6 +679,9 @@ def main():
     
     df_permisos = cargar_datos()
 
+    # ---------------------------------------------------------------
+    # 3. RENDERIZADO DE LA VISTA SELECCIONADA
+    # ---------------------------------------------------------------
     if opcion == "🏠 Inicio (Permisos de Hoy)":
         vista_inicio(df_permisos)
     elif opcion == "➕ Registrar Permiso":
